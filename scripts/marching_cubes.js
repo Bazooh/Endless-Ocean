@@ -1,37 +1,91 @@
 import * as THREE from 'three';
 import { edgeTable, triTable } from './marching_cubes_tables.js';
 import { addShader } from './shader.js';
+import { noise_param } from './noise.js';
 
 
-const middleEdges = [
-    new THREE.Vector3(0.5, 0, 0),
-    new THREE.Vector3(1, 0.5, 0),
-    new THREE.Vector3(0.5, 1, 0),
-    new THREE.Vector3(0, 0.5, 0),
-    new THREE.Vector3(0.5, 0, 1),
-    new THREE.Vector3(1, 0.5, 1),
-    new THREE.Vector3(0.5, 1, 1),
-    new THREE.Vector3(0, 0.5, 1),
-    new THREE.Vector3(0, 0, 0.5),
-    new THREE.Vector3(1, 0, 0.5),
-    new THREE.Vector3(1, 1, 0.5),
-    new THREE.Vector3(0, 1, 0.5)
-]
-
-
-function getCubeIndex(noise_values, x, y, z, threshold = 0) {
+function getCubeIndex(noise_values, x, y, z) {
     let cube_index = 0;
 
-    if (noise_values[x][y][z] < threshold) cube_index |= 1;
-    if (noise_values[x + 1][y][z] < threshold) cube_index |= 2;
-    if (noise_values[x + 1][y + 1][z] < threshold) cube_index |= 4;
-    if (noise_values[x][y + 1][z] < threshold) cube_index |= 8;
-    if (noise_values[x][y][z + 1] < threshold) cube_index |= 16;
-    if (noise_values[x + 1][y][z + 1] < threshold) cube_index |= 32;
-    if (noise_values[x + 1][y + 1][z + 1] < threshold) cube_index |= 64;
-    if (noise_values[x][y + 1][z + 1] < threshold) cube_index |= 128;
+    if (noise_values[x][y][z] < noise_param.threshold) cube_index |= 1;
+    if (noise_values[x + 1][y][z] < noise_param.threshold) cube_index |= 2;
+    if (noise_values[x + 1][y + 1][z] < noise_param.threshold) cube_index |= 4;
+    if (noise_values[x][y + 1][z] < noise_param.threshold) cube_index |= 8;
+    if (noise_values[x][y][z + 1] < noise_param.threshold) cube_index |= 16;
+    if (noise_values[x + 1][y][z + 1] < noise_param.threshold) cube_index |= 32;
+    if (noise_values[x + 1][y + 1][z + 1] < noise_param.threshold) cube_index |= 64;
+    if (noise_values[x][y + 1][z + 1] < noise_param.threshold) cube_index |= 128;
 
     return cube_index;
+}
+
+
+function getVertices(noise_values, x, y, z, edges, ratio) {
+    const vertices = [];
+    const indices = new Array(12).fill(-1);
+
+    if (edges & 1) {
+        indices[0] = vertices.length / 3;
+        const mu = (noise_param.threshold - noise_values[x][y][z]) / (noise_values[x + 1][y][z] - noise_values[x][y][z]);
+        vertices.push((x + mu)*ratio.x, y*ratio.y, z*ratio.z);
+    }
+    if (edges & 2) {
+        indices[1] = vertices.length / 3;
+        const mu = (noise_param.threshold - noise_values[x + 1][y][z]) / (noise_values[x + 1][y + 1][z] - noise_values[x + 1][y][z]);
+        vertices.push((x + 1)*ratio.x, (y + mu)*ratio.y, z*ratio.z);
+    }
+    if (edges & 4) {
+        indices[2] = vertices.length / 3;
+        const mu = (noise_param.threshold - noise_values[x][y + 1][z]) / (noise_values[x + 1][y + 1][z] - noise_values[x][y + 1][z]);
+        vertices.push((x + mu)*ratio.x, (y + 1)*ratio.y, z*ratio.z);
+    }
+    if (edges & 8) {
+        indices[3] = vertices.length / 3;
+        const mu = (noise_param.threshold - noise_values[x][y][z]) / (noise_values[x][y + 1][z] - noise_values[x][y][z]);
+        vertices.push(x*ratio.x, (y + mu)*ratio.y, z*ratio.z);
+    }
+    if (edges & 16) {
+        indices[4] = vertices.length / 3;
+        const mu = (noise_param.threshold - noise_values[x][y][z + 1]) / (noise_values[x + 1][y][z + 1] - noise_values[x][y][z + 1]);
+        vertices.push((x + mu)*ratio.x, y*ratio.y, (z + 1)*ratio.z);
+    }
+    if (edges & 32) {
+        indices[5] = vertices.length / 3;
+        const mu = (noise_param.threshold - noise_values[x + 1][y][z + 1]) / (noise_values[x + 1][y + 1][z + 1] - noise_values[x + 1][y][z + 1]);
+        vertices.push((x + 1)*ratio.x, (y + mu)*ratio.y, (z + 1)*ratio.z);
+    }
+    if (edges & 64) {
+        indices[6] = vertices.length / 3;
+        const mu = (noise_param.threshold - noise_values[x][y + 1][z + 1]) / (noise_values[x + 1][y + 1][z + 1] - noise_values[x][y + 1][z + 1]);
+        vertices.push((x + mu)*ratio.x, (y + 1)*ratio.y, (z + 1)*ratio.z);
+    }
+    if (edges & 128) {
+        indices[7] = vertices.length / 3;
+        const mu = (noise_param.threshold - noise_values[x][y][z + 1]) / (noise_values[x][y + 1][z + 1] - noise_values[x][y][z + 1]);
+        vertices.push(x*ratio.x, (y + mu)*ratio.y, (z + 1)*ratio.z);
+    }
+    if (edges & 256) {
+        indices[8] = vertices.length / 3;
+        const mu = (noise_param.threshold - noise_values[x][y][z]) / (noise_values[x][y][z + 1] - noise_values[x][y][z]);
+        vertices.push(x*ratio.x, y*ratio.y, (z + mu)*ratio.z)
+    }
+    if (edges & 512) {
+        indices[9] = vertices.length / 3;
+        const mu = (noise_param.threshold - noise_values[x + 1][y][z]) / (noise_values[x + 1][y][z + 1] - noise_values[x + 1][y][z]);
+        vertices.push((x + 1)*ratio.x, y*ratio.y, (z + mu)*ratio.z);
+    }
+    if (edges & 1024) {
+        indices[10] = vertices.length / 3;
+        const mu = (noise_param.threshold - noise_values[x + 1][y + 1][z]) / (noise_values[x + 1][y + 1][z + 1] - noise_values[x + 1][y + 1][z]);
+        vertices.push((x + 1)*ratio.x, (y + 1)*ratio.y, (z + mu)*ratio.z);
+    }
+    if (edges & 2048) {
+        indices[11] = vertices.length / 3;
+        const mu = (noise_param.threshold - noise_values[x][y + 1][z]) / (noise_values[x][y + 1][z + 1] - noise_values[x][y + 1][z]);
+        vertices.push(x*ratio.x, (y + 1)*ratio.y, (z + mu)*ratio.z);
+    }
+
+    return {_vertices: vertices, _vertex_indices: indices};
 }
 
 
@@ -58,16 +112,8 @@ function createGeometry(n_vertices, chunk_size, noise) {
                 const edges = edgeTable[cube_index];
                 const triangles = triTable.slice(cube_index * 16, cube_index * 16 + 16).filter((val) => val != -1);
 
-                const _vertices = [];
-                const vertices_indices = [];
-                for (let i = 0; i < 12; i++) {
-                    vertices_indices.push(-1);
-                    if (edges & (1 << i)) {
-                        vertices_indices[i] = _vertices.length / 3;
-                        _vertices.push(...new THREE.Vector3(x, y, z).add(middleEdges[i]).multiply(ratio));
-                    }
-                }
-                const _indices = triangles.map((val) => vertices_indices[val] + vertices.length / 3);
+                const {_vertices, _vertex_indices} = getVertices(noise_values, x, y, z, edges, ratio);
+                const _indices = triangles.map((val) => _vertex_indices[val] + vertices.length / 3);
 
                 vertices.push(..._vertices);
                 indices.push(..._indices);
