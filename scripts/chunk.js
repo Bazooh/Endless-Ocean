@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createNoise3D } from 'noise';
+import { createNoise } from './noise.js';
 import { createMarchingCubes } from "./marching_cubes.js";
 import { scene } from './scene.js';
 
@@ -11,9 +11,8 @@ const chunks = {};
 const noise = createNoise();
 
 
-function createNoise(frequency = 0.8) {
-    const noise = createNoise3D();
-    return (x, y, z) => noise(x * frequency, y * frequency, z * frequency);
+function getCoordsFromId(id) {
+    return id.split(',').map((val) => parseInt(val));
 }
 
 
@@ -49,6 +48,13 @@ export function unloadChunk(x, y, z) {
 }
 
 
+export function unloadAllChunks() {
+    Object.keys(chunks).forEach((id) => {
+        unloadChunk(...getCoordsFromId(id));
+    });
+}
+
+
 export function getChunk(x, y, z) {
     return chunks[`${x},${y},${z}`];
 }
@@ -62,4 +68,13 @@ export function loadChunks(position, size) {
             }
         }
     }
+}
+
+
+export function forceChunksUpdate() {
+    Object.keys(chunks).forEach((id) => {
+        const [x, y, z] = getCoordsFromId(id);
+        unloadChunk(x, y, z);
+        loadChunk(x, y, z);
+    });
 }

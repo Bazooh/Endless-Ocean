@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'control';
 import { loadChunks } from './chunk.js';
+import { updateNoiseGUI } from './noise.js';
+import { GUI } from 'dat.gui';
 
 
 const view = {
@@ -20,6 +22,9 @@ const view = {
 }
 
 
+const gui = new GUI();
+updateNoiseGUI(gui);
+
 export const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(view.fov, window.innerWidth / window.innerHeight, view.near, view.far);
@@ -34,7 +39,8 @@ controls.target.set(view.target.x, view.target.y, view.target.z);
 controls.update();
 
 
-loadChunks(new THREE.Vector3(0, 0, 0), new THREE.Vector3(5, 5, 5));
+const map_size = new THREE.Vector3(4, 4, 4);
+loadChunks(new THREE.Vector3(-2, -2, -2), map_size);
 
 
 function animate() {
