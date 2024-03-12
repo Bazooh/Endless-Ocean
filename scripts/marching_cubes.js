@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { edgeTable, triTable } from './marching_cubes_tables.js';
+import { addShader } from './shader.js';
 
 
 const middleEdges = [
@@ -76,6 +77,7 @@ function createGeometry(n_vertices, chunk_size, noise) {
 
     geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
     geometry.setIndex(new THREE.BufferAttribute(new Uint16Array(indices), 1));
+    geometry.computeVertexNormals();
 
     return geometry;
 }
@@ -85,7 +87,9 @@ export function createMarchingCubes(noise, chunk_size, n_vertices = new THREE.Ve
     if (n_vertices.x * n_vertices.y * n_vertices.z > 10_000) throw new Error('Too much vertices : ' + n_vertices.x + ' x ' + n_vertices.y + ' x ' + n_vertices.z + ' = ' + n_vertices.x * n_vertices.y * n_vertices.z + ' > 10_000');
 
     const geometry = createGeometry(n_vertices, chunk_size, noise);
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true, side: THREE.DoubleSide});
+    const material = new THREE.ShaderMaterial({side: THREE.DoubleSide, wireframe: false});
+    addShader('terrain_vertex', material, "vertexShader");
+    addShader('terrain_fragment', material, "fragmentShader", {uTime: 0, uLightPos: new THREE.Vector3(0, 10, 0), uLightIntensity: 1.0})
     const mesh = new THREE.Mesh(geometry, material);
 
     return mesh;

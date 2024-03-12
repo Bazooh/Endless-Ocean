@@ -4,7 +4,7 @@ import { createMarchingCubes } from "./marching_cubes.js";
 import { scene } from './scene.js';
 
 
-const chunk_size = new THREE.Vector3(100, 100, 100);
+const chunk_size = new THREE.Vector3(10, 10, 10);
 const n_vertices = new THREE.Vector3(16, 16, 16);
 const chunks = {};
 
@@ -60,6 +60,7 @@ export function getChunk(x, y, z) {
 }
 
 
+// Load a cube of chunks
 export function loadChunks(position, size) {
     for (let x = position.x; x < position.x + size.x; x++) {
         for (let y = position.y; y < position.y + size.y; y++) {
@@ -77,4 +78,9 @@ export function forceChunksUpdate() {
         unloadChunk(x, y, z);
         loadChunk(x, y, z);
     });
+}
+
+
+export function canMoveTo(x, y, z) {
+    return noise(x, y, z) < 0;
 }

@@ -10,9 +10,9 @@ const view = {
     near: 0.1,
     far: 1000,
     position: {
-        x: 5,
-        y: 5,
-        z: 5
+        x: 20,
+        y: 20,
+        z: 20
     },
     target: {
         x: 0,
@@ -20,6 +20,9 @@ const view = {
         z: 0
     }
 }
+
+export const surface_level = 0;
+export const floor_level = -4;
 
 
 const gui = new GUI();
@@ -39,8 +42,8 @@ controls.target.set(view.target.x, view.target.y, view.target.z);
 controls.update();
 
 
-const map_size = new THREE.Vector3(4, 4, 4);
-loadChunks(new THREE.Vector3(-2, -2, -2), map_size);
+const map_size = new THREE.Vector3(6, surface_level - floor_level, 6);
+loadChunks(new THREE.Vector3(-3, floor_level, -3), map_size);
 
 
 function animate() {
