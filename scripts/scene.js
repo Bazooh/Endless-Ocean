@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'control';
-import { createMarchingCubes } from './marching_cubes.js';
+import { loadChunks } from './chunk.js';
 
 
 const view = {
@@ -20,7 +20,7 @@ const view = {
 }
 
 
-const scene = new THREE.Scene();
+export const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(view.fov, window.innerWidth / window.innerHeight, view.near, view.far);
 camera.position.set(view.position.x, view.position.y, view.position.z);
@@ -34,8 +34,7 @@ controls.target.set(view.target.x, view.target.y, view.target.z);
 controls.update();
 
 
-const marchingCubes = createMarchingCubes();
-scene.add(marchingCubes);
+loadChunks(new THREE.Vector3(0, 0, 0), new THREE.Vector3(5, 5, 5));
 
 
 function animate() {

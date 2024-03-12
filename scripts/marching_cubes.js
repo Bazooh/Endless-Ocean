@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { createNoise3D } from 'noise';
 import { edgeTable, triTable } from './marching_cubes_tables.js';
 
 
@@ -35,13 +34,13 @@ function getCubeIndex(noise_values, x, y, z, threshold = 0) {
 }
 
 
-function createGeometry(size) {
+function createGeometry(n_vertices, chunk_size, noise) {
     const geometry = new THREE.BufferGeometry();
-    const noise = createNoise3D()
+    const ratio = new THREE.Vector3(chunk_size.x / n_vertices.x, chunk_size.y / n_vertices.y, chunk_size.z / n_vertices.z);
 
-    const noise_values = Array.from({length: size.x + 1}, (_, x) =>
-        Array.from({length: size.y + 1}, (_, y) =>
-            Array.from({length: size.z + 1}, (_, z) =>
+    const noise_values = Array.from({length: n_vertices.x + 1}, (_, x) =>
+        Array.from({length: n_vertices.y + 1}, (_, y) =>
+            Array.from({length: n_vertices.z + 1}, (_, z) =>
                 noise(x, y, z)
             )
         )
@@ -50,9 +49,9 @@ function createGeometry(size) {
     const vertices = [];
     const indices = [];
 
-    for (let x = 0; x < size.x; x++) {
-        for (let y = 0; y < size.y; y++) {
-            for (let z = 0; z < size.z; z++) {
+    for (let x = 0; x < n_vertices.x; x++) {
+        for (let y = 0; y < n_vertices.y; y++) {
+            for (let z = 0; z < n_vertices.z; z++) {
                 const cube_index = getCubeIndex(noise_values, x, y, z);
 
                 const edges = edgeTable[cube_index];
@@ -64,7 +63,7 @@ function createGeometry(size) {
                     vertices_indices.push(-1);
                     if (edges & (1 << i)) {
                         vertices_indices[i] = _vertices.length / 3;
-                        _vertices.push(...middleEdges[i].clone().add(new THREE.Vector3(x, y, z)));
+                        _vertices.push(...new THREE.Vector3(x, y, z).add(middleEdges[i]).multiply(ratio));
                     }
                 }
                 const _indices = triangles.map((val) => vertices_indices[val] + vertices.length / 3);
@@ -82,9 +81,11 @@ function createGeometry(size) {
 }
 
 
-export function createMarchingCubes(size = new THREE.Vector3(5, 5, 5)) {
-    const geometry = createGeometry(size);
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: false, side: THREE.DoubleSide});
+export function createMarchingCubes(noise, chunk_size, n_vertices = new THREE.Vector3(20, 20, 20)) {
+    if (n_vertices.x * n_vertices.y * n_vertices.z > 10_000) throw new Error('Too much vertices : ' + n_vertices.x + ' x ' + n_vertices.y + ' x ' + n_vertices.z + ' = ' + n_vertices.x * n_vertices.y * n_vertices.z + ' > 10_000');
+
+    const geometry = createGeometry(n_vertices, chunk_size, noise);
+    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true, side: THREE.DoubleSide});
     const mesh = new THREE.Mesh(geometry, material);
 
     return mesh;
