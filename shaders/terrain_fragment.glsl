@@ -8,8 +8,6 @@ uniform float uLightIntensity;
 
 vec3 apply_lighting(vec3 color) {
     const vec3 lightColor = vec3(1.0);
-    const float specularStrength = 0.5;
-    const float shininess = 32.0;
 
     vec3 lightDir = normalize(uLightPos - worldPosition);
     float diff = max(dot(vNormal, lightDir), 0.0);

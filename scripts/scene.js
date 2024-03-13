@@ -3,6 +3,8 @@ import { OrbitControls } from 'control';
 import { loadChunks } from './chunk.js';
 import { updateNoiseGUI } from './noise.js';
 import { GUI } from 'dat.gui';
+import { Player } from './entities/player.js';
+import { updateEntities } from './entities/entity.js';
 
 
 const view = {
@@ -30,7 +32,7 @@ updateNoiseGUI(gui);
 
 export const scene = new THREE.Scene();
 
-const camera = new THREE.PerspectiveCamera(view.fov, window.innerWidth / window.innerHeight, view.near, view.far);
+export const camera = new THREE.PerspectiveCamera(view.fov, window.innerWidth / window.innerHeight, view.near, view.far);
 camera.position.set(view.position.x, view.position.y, view.position.z);
 
 const renderer = new THREE.WebGLRenderer();
@@ -42,12 +44,15 @@ controls.target.set(view.target.x, view.target.y, view.target.z);
 controls.update();
 
 
+const player = new Player(new THREE.Vector3(view.position.x, view.position.y, view.position.z));
+
 const map_size = new THREE.Vector3(6, surface_level - floor_level, 6);
 loadChunks(new THREE.Vector3(-3, floor_level, -3), map_size);
 
-
 function animate() {
     requestAnimationFrame(animate);
+
+    updateEntities();
 
     renderer.render(scene, camera);
 }
