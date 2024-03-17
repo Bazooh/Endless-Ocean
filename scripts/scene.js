@@ -5,6 +5,11 @@ import { updateNoiseGUI } from './noise.js';
 import { GUI } from 'dat.gui';
 import { Player } from './entities/player.js';
 import { updateEntities } from './entities/entity.js';
+import { updateChunksShaderUniforms } from './chunk.js';
+import { addShader } from './shader.js';
+import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three/examples/jsm/postprocessing/RenderPass.js';
+import { ShaderPass } from 'https://cdn.jsdelivr.net/npm/three/examples/jsm/postprocessing/ShaderPass.js';
 
 
 const view = {
@@ -28,6 +33,10 @@ export const floor_level = -4;
 
 
 const gui = new GUI();
+const light = {light_height: 0};
+gui.add(light, 'light_height', -20, 20, 0.1).onChange(() => {
+    updateChunksShaderUniforms({'uLightPos': new THREE.Vector3(0, light.light_height, 0)});
+});
 updateNoiseGUI(gui);
 
 export const scene = new THREE.Scene();
@@ -38,6 +47,35 @@ camera.position.set(view.position.x, view.position.y, view.position.z);
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+
+
+composer.addPass(new ShaderPass({
+    uniforms: {
+        tDiffuse: {value: null}
+    },
+    vertexShader: `
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: `
+        uniform sampler2D tDiffuse;
+        varying vec2 vUv;
+
+        void main() {
+            vec4 diffuse = texture2D(tDiffuse, vUv);
+
+            const vec3 oceanColor = vec3(0.0, 0.0, 0.3);
+
+            gl_FragColor = mix(diffuse, vec4(oceanColor, 1.0), 0.5);
+        }
+    `
+}));
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(view.target.x, view.target.y, view.target.z);
@@ -54,7 +92,7 @@ function animate() {
 
     updateEntities();
 
-    renderer.render(scene, camera);
+    composer.render();
 }
 
 animate();
