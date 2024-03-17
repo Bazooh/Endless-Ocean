@@ -82,5 +82,18 @@ export function forceChunksUpdate() {
 
 
 export function canMoveTo(x, y, z) {
-    return noise(x, y, z) < 0;
+    return noise(x / chunk_size.x, y / chunk_size.y, z / chunk_size.z) < 0;
+}
+
+
+export function updateChunksShaderUniforms(uniforms) {
+    Object.values(chunks).forEach((chunk) => {
+        Object.keys(uniforms).forEach((key) => {
+            if (chunk.material.uniforms[key] === undefined) {
+                return;
+            }
+            
+            chunk.material.uniforms[key].value = uniforms[key];
+        });
+    });
 }

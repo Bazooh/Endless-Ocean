@@ -134,8 +134,7 @@ export function createMarchingCubes(noise, chunk_size, n_vertices = new THREE.Ve
 
     const geometry = createGeometry(n_vertices, chunk_size, noise);
     const material = new THREE.ShaderMaterial({side: THREE.DoubleSide, wireframe: false});
-    addShader('terrain_vertex', material, "vertexShader");
-    addShader('terrain_fragment', material, "fragmentShader", {uTime: 0, uLightPos: new THREE.Vector3(0, 10, 0), uLightIntensity: 1.0})
+    addShader('terrain', material, {uTime: 0, uLightPos: new THREE.Vector3(0, 10, 0), uLightIntensity: 1.0});
     const mesh = new THREE.Mesh(geometry, material);
 
     return mesh;

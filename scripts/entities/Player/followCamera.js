@@ -34,8 +34,6 @@ export function updateCameraGUI(gui, controls, player) {
     lookFolder.add(camera_param.lookPosition, 'z', -10, 0, 1).name("Offset Z");
 }
 
-var player;
-
 export class FollowCamera {
     constructor(camera, player) {
         this.camera = camera;
@@ -60,12 +58,12 @@ export class FollowCamera {
         return this.player.position.clone().add(lookPos);
     }
 
-    update(deltaTime) {
+    update(delta_time) {
         
         var targetPosition = this.getTargetPosition();
         var targetLook = this.getTargetLook();
 
-        var scaledDelta = 1.0 - Math.pow(0.001, deltaTime);
+        var scaledDelta = 1.0 - Math.pow(0.001, delta_time);
 
         this.position.lerp(targetPosition, camera_param.followSpeed * (scaledDelta));
         this.lookPos.copy(targetLook, camera_param.followSpeed * (scaledDelta));

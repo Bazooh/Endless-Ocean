@@ -1,15 +1,27 @@
-export function addShader(shader, material, shader_type = "fragmentShader", uniforms = {}) {
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', `./shaders/${shader}.glsl`, true);
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            material[shader_type] = xhr.responseText;
+export function addShader(shader, material = {}, uniforms = {}) {
+    if (material.uniforms === undefined) material.uniforms = {};
+
+    Object.entries(uniforms).forEach(([key, value]) => {
+        material.uniforms[key] = { value: value };
+    });
+
+    const vertexPromise = fetch(`./shaders/${shader}_vertex.glsl`)
+        .then((response) => response.text())
+        .then((data) => {
+            material.vertexShader = data;
             material.needsUpdate = true;
 
-            Object.entries(uniforms).forEach(([key, value]) => {
-                material.uniforms[key] = { value: value };
-            });
-        }
-    };
-    xhr.send();
+            return material;
+    });
+    
+    const fragmentPromise = fetch(`./shaders/${shader}_fragment.glsl`)
+        .then((response) => response.text())
+        .then((data) => {
+            material.fragmentShader = data;
+            material.needsUpdate = true;
+
+            return material;
+    });
+
+    return Promise.all([vertexPromise, fragmentPromise]);
 }

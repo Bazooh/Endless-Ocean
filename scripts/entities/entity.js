@@ -51,7 +51,7 @@ export class Entity {
        
     }
 
-    update(deltaTime) {}
+    update(delta_time) {}
 
     requireUpdate() {
         const current_time = performance.now();
