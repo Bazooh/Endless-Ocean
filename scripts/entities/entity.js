@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {scene} from '../scene.js';
 
 
 const entities = [];
@@ -10,15 +11,26 @@ export function updateEntities() {
     });
 }
 
-
 export class Entity {
+
+    get direction() {return this._direction;}
+
+    set direction(new_direction) {this._direction = new_direction}
+
     constructor(starting_position) {
+
+        this.direction = new THREE.Vector3(0,0,-1);
         this.position = starting_position;
         this.velocity = new THREE.Vector3();
         this.acceleration = new THREE.Vector3();
         this.prev_time = performance.now();
-
+        
         entities.push(this);
+
+        this.loadModel();
+        this.addToScene();
+
+       
     }
 
     get position() {
@@ -27,6 +39,16 @@ export class Entity {
 
     set position(new_position) {
         this._position = new_position;
+        if (this.model != null) this.model.position.set(this.position.x, this.position.y, this.position.z);
+    }
+
+    loadModel() {this.model = null;}
+
+    addToScene() {
+        if (this.model != null) {
+            scene.add(this.model);
+        }
+       
     }
 
     update(deltaTime) {}
