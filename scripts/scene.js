@@ -45,31 +45,7 @@ document.body.appendChild(renderer.domElement);
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 
-
-composer.addPass(new ShaderPass({
-    uniforms: {
-        tDiffuse: {value: null}
-    },
-    vertexShader: `
-        varying vec2 vUv;
-        void main() {
-            vUv = uv;
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-    `,
-    fragmentShader: `
-        uniform sampler2D tDiffuse;
-        varying vec2 vUv;
-
-        void main() {
-            vec4 diffuse = texture2D(tDiffuse, vUv);
-
-            const vec3 oceanColor = vec3(0.0, 0.0, 0.3);
-
-            gl_FragColor = mix(diffuse, vec4(oceanColor, 1.0), 0.5);
-        }
-    `
-}));
+addShader('water', {}, {tDiffuse: {value: null}}).then(([shader, _]) => composer.addPass(new ShaderPass(shader)));
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(view.target.x, view.target.y, view.target.z);
@@ -81,7 +57,6 @@ const gui = new GUI();
 updateNoiseGUI(gui);
 updatePlayerGUI(gui);
 updateCameraGUI(gui, controls, player);
-updateNoiseGUI(gui);
 
 const light = {light_height: 0};
 gui.add(light, 'light_height', -20, 20, 0.1).onChange(() => {

@@ -3,7 +3,7 @@ import { camera, scene } from '../../scene.js';
 import { Entity } from '../entity.js';
 import {Input} from './input.js';
 import { FollowCamera } from './followCamera.js';
-import { updateChunksShaderUniforms } from '../../world/chunks.js';
+import { updateChunksShaderUniforms } from '../../chunk.js';
 
 
 const up = new THREE.Vector3(0,1,0);
