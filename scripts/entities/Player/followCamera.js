@@ -8,8 +8,8 @@ export const camera_param = {
     followSpeed: 1,
     offset: {
         x: 0,
-        y: 5,
-        z: 5,
+        y: 4,
+        z: 6,
     },
     lookPosition: {
         x: 0,
@@ -23,15 +23,15 @@ export function updateCameraGUI(gui, controls, player) {
     folder.add(camera_param, 'updateCamera').name("Update Camera").onChange(() => {controls.target.set(player.position.x, player.position.y, player.position.z); controls.update();});
     folder.add(camera_param, 'followSpeed', 0.1, 5, 0.1).name("Follow Speed");
 
-    const offsetFolder = folder.addFolder('Offset');
-    offsetFolder.add(camera_param.offset, 'x').name("Offset X");
-    offsetFolder.add(camera_param.offset, 'y').name("Offset X");
-    offsetFolder.add(camera_param.offset, 'z').name("Offset X");
+    const positionFolder = folder.addFolder('Position Offset');
+    positionFolder.add(camera_param.offset, 'x', -10, 10, 1).name("Position X");
+    positionFolder.add(camera_param.offset, 'y', -10, 10, 1).name("Position Y");
+    positionFolder.add(camera_param.offset, 'z',  0, 10, 1).name("Position Z");
 
-    const lookFolder = folder.addFolder('Look Position');
-    lookFolder.add(camera_param.lookPosition, 'x').name("Offset X");
-    lookFolder.add(camera_param.lookPosition, 'y').name("Offset Y");
-    lookFolder.add(camera_param.lookPosition, 'z').name("Offset Z");
+    const lookFolder = folder.addFolder('Look Offset');
+    lookFolder.add(camera_param.lookPosition, 'x', -10, 10, 1).name("Offset X");
+    lookFolder.add(camera_param.lookPosition, 'y', -10, 10, 1).name("Offset Y");
+    lookFolder.add(camera_param.lookPosition, 'z', -10, 0, 1).name("Offset Z");
 }
 
 var player;
@@ -44,7 +44,7 @@ export class FollowCamera {
         this.lookPos = new THREE.Vector3();
 
         this.position.copy(this.getTargetPosition());
-        this.lookPos.copy(this.getTargetLookPos());
+        this.lookPos.copy(this.getTargetLook());
     }
 
 
@@ -54,7 +54,7 @@ export class FollowCamera {
         return this.player.position.clone().add(offset);
     }
 
-    getTargetLookPos() {
+    getTargetLook() {
         var lookPos = new THREE.Vector3(camera_param.lookPosition.x, camera_param.lookPosition.y, camera_param.lookPosition.z);
         lookPos.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(forward, this.player.direction));
         return this.player.position.clone().add(lookPos);
@@ -63,12 +63,12 @@ export class FollowCamera {
     update(deltaTime) {
         
         var targetPosition = this.getTargetPosition();
-        var targetLookPos = this.getTargetLookPos();
+        var targetLook = this.getTargetLook();
 
         var scaledDelta = 1.0 - Math.pow(0.001, deltaTime);
 
         this.position.lerp(targetPosition, camera_param.followSpeed * (scaledDelta));
-        this.lookPos.copy(targetLookPos, camera_param.followSpeed * (scaledDelta));
+        this.lookPos.copy(targetLook, camera_param.followSpeed * (scaledDelta));
 
         if (!camera_param.updateCamera) return;
 

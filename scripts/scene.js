@@ -7,6 +7,13 @@ import { Player, updatePlayerGUI } from './entities/Player/player.js';
 import {updateCameraGUI} from './entities/Player/followCamera.js';
 import { updateEntities } from './entities/entity.js';
 
+const playerSpawn = {
+    position: {
+        x: 0,
+        y: 0,
+        z: 0
+    }
+}
 
 const view = {
     fov: 75,
@@ -41,11 +48,11 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(view.target.x, view.target.y, view.target.z);
 controls.update();
 
-const player = new Player(new THREE.Vector3(view.position.x, view.position.y, view.position.z));
+const player = new Player(new THREE.Vector3(playerSpawn.position.x, playerSpawn.position.y, playerSpawn.position.z));
 
 const gui = new GUI();
 updateNoiseGUI(gui);
-updatePlayerGUI(gui);
+updatePlayerGUI(gui, player);
 updateCameraGUI(gui, controls, player);
 
 const map_size = new THREE.Vector3(6, surface_level - floor_level, 6);
