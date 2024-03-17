@@ -25,8 +25,8 @@ export function updateCameraGUI(gui, controls, player) {
 
     const offsetFolder = folder.addFolder('Offset');
     offsetFolder.add(camera_param.offset, 'x').name("Offset X");
-    offsetFolder.add(camera_param.offset, 'y').name("Offset X");
-    offsetFolder.add(camera_param.offset, 'z').name("Offset X");
+    offsetFolder.add(camera_param.offset, 'y').name("Offset Y");
+    offsetFolder.add(camera_param.offset, 'z').name("Offset Z");
 
     const lookFolder = folder.addFolder('Look Position');
     lookFolder.add(camera_param.lookPosition, 'x').name("Offset X");
@@ -60,12 +60,12 @@ export class FollowCamera {
         return this.player.position.clone().add(lookPos);
     }
 
-    update(deltaTime) {
+    update(delta_time) {
         
         var targetPosition = this.getTargetPosition();
         var targetLookPos = this.getTargetLookPos();
 
-        var scaledDelta = 1.0 - Math.pow(0.001, deltaTime);
+        var scaledDelta = 1.0 - Math.pow(0.001, delta_time);
 
         this.position.lerp(targetPosition, camera_param.followSpeed * (scaledDelta));
         this.lookPos.copy(targetLookPos, camera_param.followSpeed * (scaledDelta));
