@@ -3,7 +3,8 @@ import { OrbitControls } from 'control';
 import { loadChunks } from './chunk.js';
 import { updateNoiseGUI } from './noise.js';
 import { GUI } from 'dat.gui';
-import { Player, updatePlayerGUI } from './entities/player.js';
+import { Player, updatePlayerGUI } from './entities/Player/player.js';
+import {updateCameraGUI} from './entities/Player/followCamera.js';
 import { updateEntities } from './entities/entity.js';
 
 
@@ -44,7 +45,8 @@ const player = new Player(new THREE.Vector3(view.position.x, view.position.y, vi
 
 const gui = new GUI();
 updateNoiseGUI(gui);
-updatePlayerGUI(gui, controls, player);
+updatePlayerGUI(gui);
+updateCameraGUI(gui, controls, player);
 
 const map_size = new THREE.Vector3(6, surface_level - floor_level, 6);
 loadChunks(new THREE.Vector3(-3, floor_level, -3), map_size);
