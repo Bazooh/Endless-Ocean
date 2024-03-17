@@ -68,8 +68,7 @@ export class Player extends Entity {
     }
 
     inWall(position) {
-        console.log(canMoveTo(position));
-        return canMoveTo(position);
+        return !canMoveTo(...position);
     }
 
     _getAxis(positive, negative) {
