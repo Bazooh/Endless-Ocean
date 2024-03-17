@@ -3,12 +3,11 @@ import { camera, scene } from '../../scene.js';
 import { Entity } from '../entity.js';
 import {Input} from './input.js';
 import { FollowCamera } from './followCamera.js';
-import { updateChunksShaderUniforms } from '../../chunk.js';
+import { canMoveTo, updateChunksShaderUniforms } from '../../chunk.js';
 
 
 const up = new THREE.Vector3(0,1,0);
 const forward = new THREE.Vector3(0,0,-1);
-
 
 
 export const player_param = {
@@ -49,33 +48,42 @@ export class Player extends Entity {
         this.followCamera = new FollowCamera(camera, this);
     }
 
+
     get position() {
         return super.position;
     }
+
 
     set position(new_position) {
         super.position = new_position;
         updateChunksShaderUniforms({'uLightPos': new_position});
     }
 
+
     updateCameraPosition() {
         
-        var offset = cameraOffset.clone().applyQuaternion(new THREE.Quaternion().setFromUnitVectors(forward, this.direction))
+        const offset = cameraOffset.clone().applyQuaternion(new THREE.Quaternion().setFromUnitVectors(forward, this.direction))
 
-        var cameraPosition = this.position.clone().add(offset);
+        const cameraPosition = this.position.clone().add(offset);
     
         camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
         camera.lookAt(super.position.x, super.position.y, super.position.z);
     }
 
+
+    _getAxis(positive, negative) {
+        return (positive ? 1 : 0) + (negative ? -1 : 0);
+    }
+
+
     update(delta_time) {
 
         //Acceleration based on input
-        this.acceleration = this.direction.clone().multiplyScalar(((this.input.forward ? 1 : 0) + (this.input.backward ? -1 : 0)) * player_param.horizontalAcceleration);
-        this.acceleration.add(up.clone().multiplyScalar(((this.input.up ? 1 : 0) + (this.input.down ? -1 : 0)) * player_param.verticalAcceleration));
+        this.acceleration = this.direction.clone().multiplyScalar(this._getAxis(this.input.forward, this.input.backward) * player_param.horizontalAcceleration);
+        this.acceleration.add(up.clone().multiplyScalar(this._getAxis(this.input.up, this.input.down) * player_param.verticalAcceleration));
 
         //Friction (Water Resistance)
-        this.acceleration.add(this.velocity.clone().multiplyScalar(-1 * player_param.friction))
+        this.acceleration.add(this.velocity.clone().multiplyScalar(-player_param.friction))
 
         //Velocity
         this.velocity.add(this.acceleration.clone().multiplyScalar(delta_time));
@@ -84,7 +92,7 @@ export class Player extends Entity {
         this.position = this.position.clone().add(this.velocity.clone().multiplyScalar(delta_time));
         
         //Rotations
-        this.direction.applyAxisAngle(up, ((this.input.left ? 1 : 0) + (this.input.right ? -1 : 0)) * player_param.rotationSpeed * delta_time);
+        this.direction.applyAxisAngle(up, this._getAxis(this.input.left, this.input.right) * player_param.rotationSpeed * delta_time);
         this.model.quaternion.copy(new THREE.Quaternion().setFromUnitVectors(forward, this.direction));
 
         //Camera

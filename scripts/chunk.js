@@ -82,7 +82,7 @@ export function forceChunksUpdate() {
 
 
 export function canMoveTo(x, y, z) {
-    return noise(x, y, z) < 0;
+    return noise(x / chunk_size.x, y / chunk_size.y, z / chunk_size.z) < 0;
 }
 
 
