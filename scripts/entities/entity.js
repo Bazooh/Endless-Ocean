@@ -17,6 +17,7 @@ export class Entity {
         this.loadModel();
         this.addToScene();
 
+        this.direction = new THREE.Vector3(0,0,-1);
         this.position = starting_position;
         this.velocity = new THREE.Vector3();
         this.acceleration = new THREE.Vector3();

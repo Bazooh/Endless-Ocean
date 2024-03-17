@@ -11,6 +11,7 @@ export class Input {
         document.addEventListener("keydown", this.onKeyDown.bind(this));
         document.addEventListener("keyup", this.onKeyUp.bind(this));
     }
+
     
     onKeyDown(event) {this.changeKeyInput(event.keyCode, true)};
     onKeyUp(event) {this.changeKeyInput(event.keyCode, false)};
