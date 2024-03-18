@@ -101,7 +101,7 @@ class chunk {
         }
 
         this.mesh = createMarchingCubes(
-            (_x, _y, _z) => noise(_x/n_vertices.x + this.x, _y/n_vertices.y + this.y, _z/n_vertices.z + this.z),
+            (x, y, z) => noise(x/n_vertices.x + this.x, y/n_vertices.y + this.y, z/n_vertices.z + this.z),
             chunk_size,
             n_vertices
         );

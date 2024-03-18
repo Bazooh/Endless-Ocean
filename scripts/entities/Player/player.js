@@ -1,14 +1,14 @@
 import * as THREE from 'three';
 import { camera, scene } from '../../scene.js';
-import { Entity } from '../entity.js';
+import { Entity, forward } from '../entity.js';
 import {Input} from './input.js';
 import { FollowCamera } from './followCamera.js';
 import { canMoveTo, updateChunksShaderUniforms } from '../../chunk.js';
+import { light_param } from '../../light.js';
 
 
-const up = new THREE.Vector3(0,1,0);
-const forward = new THREE.Vector3(0,0,-1);
-const zero = new THREE.Vector3(0,0,0);
+const up = new THREE.Vector3(0, 1, 0);
+const zero = new THREE.Vector3(0, 0, 0);
 
 export const player_param = {
     enableCollisions: true,
@@ -58,9 +58,34 @@ export class Player extends Entity {
     }
 
 
+    updateLightDirection() {
+        if (this.model === undefined) return;
+
+        const theta = light_param.direction_theta;
+        const phi = light_param.direction_phi - Math.acos(forward.dot(this.direction))*Math.sign(this.direction.x);
+    
+        const direction = new THREE.Vector3(
+            Math.sin(phi) * Math.sin(theta),
+            Math.cos(theta),
+            Math.cos(phi) * Math.sin(theta)
+        );
+        updateChunksShaderUniforms({'uLightDir': direction});
+    }
+
+
     set position(new_position) {
         super.position = new_position;
         updateChunksShaderUniforms({'uLightPos': new_position});
+    }
+
+
+    get direction() {
+        return super.direction;
+    }
+
+    set direction(new_direction) {
+        super.direction = new_direction;
+        this.updateLightDirection();
     }
 
     checkInWall(position) {
@@ -96,8 +121,7 @@ export class Player extends Entity {
         else this.position = targetPosition;
         
         //Rotations
-        this.direction.applyAxisAngle(up, this._getAxis(this.input.left, this.input.right) * player_param.rotationSpeed * delta_time);
-        this.model.quaternion.copy(new THREE.Quaternion().setFromUnitVectors(forward, this.direction));
+        this.direction = this.direction.applyAxisAngle(up, this._getAxis(this.input.left, this.input.right) * player_param.rotationSpeed * delta_time);
 
         //Camera
         this.followCamera.update(delta_time);

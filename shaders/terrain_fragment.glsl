@@ -2,18 +2,27 @@ varying vec3 worldPosition;
 varying vec3 vNormal;
 
 uniform float uTime;
+uniform vec3 uLightColor;
 uniform vec3 uLightPos;
+uniform vec3 uLightDir;
+uniform float uLightAngle;
 uniform float uLightIntensity;
 
 
 vec3 apply_lighting(vec3 color) {
-    const vec3 lightColor = vec3(1.0);
+    vec3 pos = worldPosition - uLightPos;
+    float angle = acos(dot(normalize(pos), uLightDir));
+
+    if (angle > uLightAngle) {
+        return vec3(0.0);
+    }
 
     vec3 lightDir = normalize(uLightPos - worldPosition);
     float diff = max(dot(vNormal, lightDir), 0.0);
-    vec3 diffuse = diff * lightColor * uLightIntensity;
+    vec3 diffuse = diff * uLightColor * uLightIntensity;
 
     vec3 result = diffuse * color;
+    result = mix(result, vec3(0.0), smoothstep(0.4, 1.0, angle / uLightAngle));
 
     return result;
 }

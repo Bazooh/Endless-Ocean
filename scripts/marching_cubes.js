@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { edgeTable, triTable } from './marching_cubes_tables.js';
 import { addShader } from './shader.js';
 import { noise_param } from './noise.js';
+import { getLightUniforms } from './light.js';
 
 
 function getCubeIndex(noise_values, x, y, z) {
@@ -134,7 +135,7 @@ export function createMarchingCubes(noise, chunk_size, n_vertices = new THREE.Ve
 
     const geometry = createGeometry(n_vertices, chunk_size, noise);
     const material = new THREE.ShaderMaterial({side: THREE.DoubleSide, wireframe: false});
-    addShader('terrain', material, {uTime: 0, uLightPos: new THREE.Vector3(0, 10, 0), uLightIntensity: 1.0});
+    addShader('terrain', material, Object.assign({uTime: 0}, getLightUniforms()));
     const mesh = new THREE.Mesh(geometry, material);
 
     return mesh;

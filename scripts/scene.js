@@ -5,6 +5,7 @@ import { updateNoiseGUI } from './noise.js';
 import { GUI } from 'dat.gui';
 import { Player, updatePlayerGUI } from './entities/Player/player.js';
 import { updateCameraGUI } from './entities/Player/followCamera.js';
+import { updateLightGUI } from './light.js';
 import { updateEntities } from './entities/entity.js';
 import { updateChunksShaderUniforms } from './chunk.js';
 import { addShader } from './shader.js';
@@ -64,11 +65,7 @@ const gui = new GUI();
 updateNoiseGUI(gui);
 updatePlayerGUI(gui, player);
 updateCameraGUI(gui, controls, player);
-
-const light = {light_height: 0};
-gui.add(light, 'light_height', -20, 20, 0.1).onChange(() => {
-    updateChunksShaderUniforms({'uLightPos': new THREE.Vector3(0, light.light_height, 0)});
-});
+updateLightGUI(gui, player);
 
 const map_size = new THREE.Vector3(6, surface_level - floor_level, 6);
 createChunks(new THREE.Vector3(-3, floor_level, -3), map_size);
