@@ -118,7 +118,7 @@ class chunk {
 
         this.geometry.dispose();
         this.material.dispose();
-        scene.remove(this);
+        scene.remove(this.mesh);
         delete chunks[this.id];
     }
 
