@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'control';
-import { loadChunks } from './chunk.js';
+import { createChunks } from './chunk.js';
 import { updateNoiseGUI } from './noise.js';
 import { GUI } from 'dat.gui';
 import { Player, updatePlayerGUI } from './entities/Player/player.js';
-import {updateCameraGUI} from './entities/Player/followCamera.js';
+import { updateCameraGUI } from './entities/Player/followCamera.js';
 import { updateEntities } from './entities/entity.js';
 import { updateChunksShaderUniforms } from './chunk.js';
 import { addShader } from './shader.js';
@@ -71,7 +71,7 @@ gui.add(light, 'light_height', -20, 20, 0.1).onChange(() => {
 });
 
 const map_size = new THREE.Vector3(6, surface_level - floor_level, 6);
-loadChunks(new THREE.Vector3(-3, floor_level, -3), map_size);
+createChunks(new THREE.Vector3(-3, floor_level, -3), map_size);
 
 function animate() {
     requestAnimationFrame(animate);
