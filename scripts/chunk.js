@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { createNoise } from './noise.js';
-import { createMarchingCubes } from "./marching_cubes.js";
+import { createMarchingCubes, getLocalNormal } from "./marching_cubes.js";
 import { scene } from './scene.js';
 
 
@@ -56,7 +56,7 @@ export function canMoveTo(x, y, z) {
 
 
 export function getNormal(x, y, z) {
-    
+    return getLocalNormal(x / chunk_size.x, y / chunk_size.y, z / chunk_size.z, noise);
 }
 
 

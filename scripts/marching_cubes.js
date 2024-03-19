@@ -5,6 +5,21 @@ import { noise_param } from './noise.js';
 import { getLightUniforms } from './light.js';
 
 
+const epsilon = 0.05;
+
+
+export function getLocalNormal(x, y, z, noise) {
+    // The normal is the gradient of the noise function
+    const nx = (noise(x - epsilon, y, z) - noise(x + epsilon, y, z)) / (2 * epsilon);
+    const ny = (noise(x, y - epsilon, z) - noise(x, y + epsilon, z)) / (2 * epsilon);
+    const nz = (noise(x, y, z - epsilon) - noise(x, y, z + epsilon)) / (2 * epsilon);
+
+    const length = Math.sqrt(nx*nx + ny*ny + nz*nz);
+
+    return [nx / length, ny / length, nz / length];
+}
+
+
 function getCubeIndex(noise_values, x, y, z) {
     let cube_index = 0;
 
@@ -90,14 +105,14 @@ function getVertices(noise_values, x, y, z, edges, ratio) {
 }
 
 
-function createGeometry(n_vertices, chunk_size, noise) {
+function createGeometry(n_vertices, chunk_size, local_noise) {
     const geometry = new THREE.BufferGeometry();
     const ratio = new THREE.Vector3(chunk_size.x / n_vertices.x, chunk_size.y / n_vertices.y, chunk_size.z / n_vertices.z);
 
     const noise_values = Array.from({length: n_vertices.x + 1}, (_, x) =>
         Array.from({length: n_vertices.y + 1}, (_, y) =>
             Array.from({length: n_vertices.z + 1}, (_, z) =>
-                noise(x, y, z)
+                local_noise(x, y, z)
             )
         )
     );
@@ -128,15 +143,7 @@ function createGeometry(n_vertices, chunk_size, noise) {
         const vy = vertices[i + 1] / ratio.y;
         const vz = vertices[i + 2] / ratio.z;
 
-        // The normal is the gradient of the noise function
-        const delta = 0.05;
-        const nx = (noise(vx - delta, vy, vz) - noise(vx + delta, vy, vz)) / (2 * delta);
-        const ny = (noise(vx, vy - delta, vz) - noise(vx, vy + delta, vz)) / (2 * delta);
-        const nz = (noise(vx, vy, vz - delta) - noise(vx, vy, vz + delta)) / (2 * delta);
-
-        const length = Math.sqrt(nx*nx + ny*ny + nz*nz);
-
-        normals.push(nx / length, ny / length, nz / length);
+        normals.push(...getLocalNormal(vx, vy, vz, local_noise));
     }
 
     geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
@@ -147,10 +154,10 @@ function createGeometry(n_vertices, chunk_size, noise) {
 }
 
 
-export function createMarchingCubes(noise, chunk_size, n_vertices = new THREE.Vector3(20, 20, 20)) {
+export function createMarchingCubes(local_noise, chunk_size, n_vertices = new THREE.Vector3(20, 20, 20)) {
     if (n_vertices.x * n_vertices.y * n_vertices.z > 10_000) throw new Error('Too much vertices : ' + n_vertices.x + ' x ' + n_vertices.y + ' x ' + n_vertices.z + ' = ' + n_vertices.x * n_vertices.y * n_vertices.z + ' > 10_000');
 
-    const geometry = createGeometry(n_vertices, chunk_size, noise);
+    const geometry = createGeometry(n_vertices, chunk_size, local_noise);
     const material = new THREE.ShaderMaterial({side: THREE.DoubleSide, wireframe: false, depthTest: true, depthWrite: true});
     addShader('terrain', material, Object.assign({uTime: 0}, getLightUniforms()));
     const mesh = new THREE.Mesh(geometry, material);
