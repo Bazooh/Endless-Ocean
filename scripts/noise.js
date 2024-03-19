@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { createNoise3D } from 'noise';
-import { forceChunksUpdate } from './chunk.js';
-import { surface_level, floor_level } from './scene.js';
+import { forceChunksUpdate, surface_level, floor_level } from './chunk.js';
 
 
 export const noise_param = {

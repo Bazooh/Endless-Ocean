@@ -3,7 +3,7 @@ import { camera, scene } from '../../scene.js';
 import { Entity, forward } from '../entity.js';
 import {Input} from './input.js';
 import { FollowCamera } from './followCamera.js';
-import { canMoveTo, updateChunksShaderUniforms } from '../../chunk.js';
+import { canMoveTo, updateChunksShaderUniforms, getChunkLineByWorldPos, createChunksFromTopToBottom, chunk_lines } from '../../chunk.js';
 import { light_param } from '../../light.js';
 
 
@@ -40,6 +40,12 @@ TODO
 
 export class Player extends Entity {
 
+    constructor(starting_position, starting_direction, view_distance) {
+        super(starting_position, starting_direction);
+        this.view_distance = view_distance;
+    }
+
+
     loadModel() {
         this.model = new THREE.Object3D();
         this.mesh = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 2, 16), new THREE.MeshBasicMaterial({color: 0xaaaaff}));
@@ -55,6 +61,57 @@ export class Player extends Entity {
 
     get position() {
         return super.position;
+    }
+
+    set position(new_position) {
+        const old_chunk_line = this.current_chunk_line;
+        super.position = new_position;
+        const new_chunk_line = this.current_chunk_line;
+
+        if (old_chunk_line !== new_chunk_line) {
+            this.loadSurroundingChunks();
+            this.unloadFarChunks();
+        }
+
+        updateChunksShaderUniforms({'uLightPos': new_position});
+    }
+
+
+    get direction() {
+        return super.direction;
+    }
+
+    set direction(new_direction) {
+        super.direction = new_direction;
+        this.updateLightDirection();
+    }
+
+
+    get current_chunk_line() {
+        if (this.position === undefined) return undefined;
+
+        return getChunkLineByWorldPos(this.position.x, this.position.z);
+    }
+
+
+    loadSurroundingChunks() {
+        const chunk_line = this.current_chunk_line;
+        
+        createChunksFromTopToBottom(
+            new THREE.Vector2(chunk_line.x, chunk_line.z),
+            new THREE.Vector2(this.view_distance, this.view_distance)
+        )
+    }
+
+
+    unloadFarChunks() {
+        const current_chunk_line = this.current_chunk_line;
+
+        Object.values(chunk_lines).forEach((chunk_line) => {
+            if (Math.abs(chunk_line.x - current_chunk_line.x) > this.view_distance || Math.abs(chunk_line.z - current_chunk_line.z) > this.view_distance) {
+                chunk_line.unload();
+            }
+        });
     }
 
 
@@ -73,32 +130,20 @@ export class Player extends Entity {
     }
 
 
-    set position(new_position) {
-        super.position = new_position;
-        updateChunksShaderUniforms({'uLightPos': new_position});
-    }
-
-
-    get direction() {
-        return super.direction;
-    }
-
-    set direction(new_direction) {
-        super.direction = new_direction;
-        this.updateLightDirection();
-    }
-
     checkInWall(position) {
         return player_param.enableCollisions && this.inWall(position);
     }
+
 
     inWall(position) {
         return !canMoveTo(...position);
     }
 
+
     _getAxis(positive, negative) {
         return (positive ? 1 : 0) + (negative ? -1 : 0);
     }
+
 
     update(delta_time) {
 

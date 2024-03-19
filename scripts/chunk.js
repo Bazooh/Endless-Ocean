@@ -6,46 +6,49 @@ import { scene } from './scene.js';
 
 const chunk_size = new THREE.Vector3(10, 10, 10);
 const n_vertices = new THREE.Vector3(16, 16, 16);
-const chunks = {};
+
+export const surface_level = 0;
+export const floor_level = -4;
+
+export const chunk_lines = {};
 
 const noise = createNoise();
 
 
 export function unloadAllChunks() {
-    Object.values(chunks).forEach((chunk) => {
-        chunk.unload();
+    Object.values(chunk_lines).forEach((chunkLine) => {
+        chunkLine.unload();
     });
 }
 
 
-function getChunk(x, y, z) {
-    return chunks[`${x},${y},${z}`];
+function getChunkLine(x, z) {
+    return chunk_lines[`${x},${z}`];
 }
 
 
-export function createChunk(x, y, z) {
-    if (getChunk(x, y, z) === undefined) {
-        new chunk(x, y, z);
-    }
+export function getChunkLineByWorldPos(x, z) {
+    return getChunkLine(Math.floor(x / chunk_size.x), Math.floor(z / chunk_size.z));
 }
 
 
 // Create a cube of chunks
-export function createChunks(position, size) {
-    for (let x = position.x; x < position.x + size.x; x++) {
-        for (let y = position.y; y < position.y + size.y; y++) {
-            for (let z = position.z; z < position.z + size.z; z++) {
-                createChunk(x, y, z);
+export function createChunksFromTopToBottom(position, radius) {
+    for (let x = position.x - radius.x; x <= position.x + radius.x; x++) {
+        for (let z = position.y - radius.y; z <= position.y + radius.y; z++) {
+            if (getChunkLine(x, z) !== undefined) {
+                continue;
             }
+
+            new verticalChunkLine(x, z);
         }
     }
 }
 
 
 export function forceChunksUpdate() {
-    Object.values(chunks).forEach((chunk) => {
-        chunk.unload();
-        chunk.load();
+    Object.values(chunk_lines).forEach((chunkLine) => {
+        chunkLine.forceUpdate();
     });
 }
 
@@ -61,8 +64,8 @@ export function getNormal(x, y, z) {
 
 
 export function updateChunksShaderUniforms(uniforms) {
-    Object.values(chunks).forEach((chunk) => {
-        chunk.updateShaderUniforms(uniforms);
+    Object.values(chunk_lines).forEach((chunkLine) => {
+        chunkLine.updateShaderUniforms(uniforms);
     });
 }
 
@@ -96,7 +99,7 @@ class chunk {
 
 
     isLoaded() {
-        return chunks[this.id] !== undefined;
+        return this.mesh !== undefined;
     }
 
 
@@ -111,7 +114,6 @@ class chunk {
             n_vertices
         );
         this.position.set(this.x * chunk_size.x, this.y * chunk_size.y, this.z * chunk_size.z);
-        chunks[this.id] = this;
         scene.add(this.mesh);
     }
 
@@ -124,7 +126,13 @@ class chunk {
         this.geometry.dispose();
         this.material.dispose();
         scene.remove(this.mesh);
-        delete chunks[this.id];
+        this.mesh = undefined;
+    }
+
+
+    forceUpdate() {
+        this.unload();
+        this.load();
     }
 
 
@@ -135,6 +143,59 @@ class chunk {
             }
 
             this.material.uniforms[key].value = uniforms[key];
+        });
+    }
+}
+
+
+class verticalChunkLine {
+
+    constructor(x, z) {
+        this.x = x;
+        this.z = z;
+        this.chunks = {};
+
+        for (let y = floor_level; y < surface_level; y++) {
+            this.chunks[y] = new chunk(x, y, z);
+        }
+
+        this.load();
+    }
+
+
+    get id() {
+        return `${this.x},${this.z}`;
+    }
+
+
+    load() {
+        Object.values(this.chunks).forEach((chunk) => {
+            chunk.load();
+        });
+
+        chunk_lines[this.id] = this;
+    }
+
+
+    unload() {
+        Object.values(this.chunks).forEach((chunk) => {
+            chunk.unload();
+        });
+
+        delete chunk_lines[this.id];
+    }
+
+
+    updateShaderUniforms(uniforms) {
+        Object.values(this.chunks).forEach((chunk) => {
+            chunk.updateShaderUniforms(uniforms);
+        });
+    }
+
+
+    forceUpdate() {
+        Object.values(this.chunks).forEach((chunk) => {
+            chunk.forceUpdate();
         });
     }
 }
