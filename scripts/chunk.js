@@ -27,8 +27,13 @@ function getChunkLine(x, z) {
 }
 
 
+export function getChunkLinePosByWorldPos(x, z) {
+    return new THREE.Vector2(Math.floor(x / chunk_size.x), Math.floor(z / chunk_size.z));
+}
+
+
 export function getChunkLineByWorldPos(x, z) {
-    return getChunkLine(Math.floor(x / chunk_size.x), Math.floor(z / chunk_size.z));
+    return getChunkLine(...getChunkLinePosByWorldPos(x, z));
 }
 
 

@@ -3,7 +3,7 @@ import { camera, scene } from '../../scene.js';
 import { Entity, forward } from '../entity.js';
 import {Input} from './input.js';
 import { FollowCamera } from './followCamera.js';
-import { canMoveTo, updateChunksShaderUniforms, getChunkLineByWorldPos, createChunksFromTopToBottom, chunk_lines } from '../../chunk.js';
+import { canMoveTo, updateChunksShaderUniforms, getChunkLineByWorldPos, getChunkLinePosByWorldPos, createChunksFromTopToBottom, chunk_lines } from '../../chunk.js';
 import { light_param } from '../../light.js';
 
 
@@ -94,21 +94,24 @@ export class Player extends Entity {
     }
 
 
+    get current_chunk_line_coords() {
+        return getChunkLinePosByWorldPos(this.position.x, this.position.z);
+    }
+
+
     loadSurroundingChunks() {
-        const chunk_line = this.current_chunk_line;
-        
         createChunksFromTopToBottom(
-            new THREE.Vector2(chunk_line.x, chunk_line.z),
+            new THREE.Vector2(...this.current_chunk_line_coords),
             new THREE.Vector2(this.view_distance, this.view_distance)
         )
     }
 
 
     unloadFarChunks() {
-        const current_chunk_line = this.current_chunk_line;
+        const [x, z] = this.current_chunk_line_coords;
 
         Object.values(chunk_lines).forEach((chunk_line) => {
-            if (Math.abs(chunk_line.x - current_chunk_line.x) > this.view_distance || Math.abs(chunk_line.z - current_chunk_line.z) > this.view_distance) {
+            if (Math.abs(chunk_line.x - x) > this.view_distance || Math.abs(chunk_line.z - z) > this.view_distance) {
                 chunk_line.unload();
             }
         });
