@@ -8,7 +8,7 @@ export function getLightUniforms() {
         uLightIntensity:  100.0,
         uLightColor: new THREE.Color(0xffffff),
         uLightDir: new THREE.Vector3(0, 0, 0),
-        uLightAngle: 0.5
+        uLightAngle: 1.0
     };
 }
 
@@ -19,7 +19,7 @@ export const light_param = {
     color: 0xffffff,
     direction_theta: 2.2,
     direction_phi: Math.PI,
-    angle: 0.5
+    angle: 1.0
 }
 
 
