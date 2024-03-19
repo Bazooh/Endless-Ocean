@@ -104,6 +104,7 @@ function createGeometry(n_vertices, chunk_size, noise) {
 
     const vertices = [];
     const indices = [];
+    const normals = [];
 
     for (let x = 0; x < n_vertices.x; x++) {
         for (let y = 0; y < n_vertices.y; y++) {
@@ -122,9 +123,24 @@ function createGeometry(n_vertices, chunk_size, noise) {
         }
     }
 
+    for (let i = 0; i < vertices.length; i += 3) {
+        const vx = vertices[i] / ratio.x;
+        const vy = vertices[i + 1] / ratio.y;
+        const vz = vertices[i + 2] / ratio.z;
+
+        const delta = 0.05;
+        const nx = (noise(vx + delta, vy, vz) - noise(vx - delta, vy, vz)) / (2 * delta);
+        const ny = (noise(vx, vy + delta, vz) - noise(vx, vy - delta, vz)) / (2 * delta);
+        const nz = (noise(vx, vy, vz + delta) - noise(vx, vy, vz - delta)) / (2 * delta);
+
+        const length = Math.sqrt(nx*nx + ny*ny + nz*nz);
+
+        normals.push(-nx / length, -ny / length, -nz / length);
+    }
+
     geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
+    geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(normals), 3));
     geometry.setIndex(new THREE.BufferAttribute(new Uint16Array(indices), 1));
-    geometry.computeVertexNormals();
 
     return geometry;
 }

@@ -31,6 +31,6 @@ export function updateLightGUI(gui, player) {
 
     folder.addColor(light_param, 'color').name("Color").onChange(() => updateChunksShaderUniforms({'uLightColor': new THREE.Color(light_param.color)}));
     const direction_folder = folder.addFolder('Direction');
-    direction_folder.add(light_param, 'direction_theta', 0, 2*Math.PI, 0.1).name("Theta").onChange(player.updateLightDirection);
-    direction_folder.add(light_param, 'direction_phi', 0, Math.PI, 0.1).name("Phi").onChange(player.updateLightDirection);
+    direction_folder.add(light_param, 'direction_theta', 0, Math.PI, 0.1).name("Theta").onChange(player.updateLightDirection);
+    direction_folder.add(light_param, 'direction_phi', 0, 2*Math.PI, 0.1).name("Phi").onChange(player.updateLightDirection);
 }
