@@ -55,6 +55,11 @@ export function canMoveTo(x, y, z) {
 }
 
 
+export function getNormal(x, y, z) {
+    
+}
+
+
 export function updateChunksShaderUniforms(uniforms) {
     Object.values(chunks).forEach((chunk) => {
         chunk.updateShaderUniforms(uniforms);

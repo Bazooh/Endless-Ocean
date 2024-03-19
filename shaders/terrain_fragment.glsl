@@ -1,5 +1,6 @@
 varying vec3 worldPosition;
 varying vec3 vNormal;
+varying float depth;
 
 uniform float uTime;
 uniform vec3 uLightColor;
@@ -7,6 +8,9 @@ uniform vec3 uLightPos;
 uniform vec3 uLightDir;
 uniform float uLightAngle;
 uniform float uLightIntensity;
+
+
+vec3 normal;
 
 
 vec3 apply_lighting(vec3 color) {
@@ -18,8 +22,8 @@ vec3 apply_lighting(vec3 color) {
     }
 
     vec3 lightDir = normalize(uLightPos - worldPosition);
-    float diff = max(dot(vNormal, lightDir), 0.0);
-    vec3 diffuse = diff * uLightColor * uLightIntensity;
+    float diff = max(dot(normal, lightDir), 0.0);
+    vec3 diffuse = diff * uLightColor * uLightIntensity / length(pos);
 
     vec3 result = diffuse * color;
     result = mix(result, vec3(0.0), smoothstep(0.4, 1.0, angle / uLightAngle));
@@ -31,9 +35,9 @@ vec3 apply_lighting(vec3 color) {
 vec3 get_color() {
     vec3 color = vec3(0.51, 0.4, 0.31);
 
-    if (vNormal.y > 0.0) {
+    if (normal.y > 0.0) {
         vec3 grassColor = vec3(0.13, 0.39, 0.13);
-        color = mix(color, grassColor, vNormal.y);
+        color = mix(color, grassColor, normal.y);
     }
 
     return color;
@@ -41,8 +45,11 @@ vec3 get_color() {
 
 
 void main() {
+    normal = normalize(vNormal);
+
     vec3 color = get_color();
     color = apply_lighting(color);
 
     gl_FragColor = vec4(color, 1.0);
+    // gl_FragColor = vec4(depth, depth, depth, 1.0);
 }

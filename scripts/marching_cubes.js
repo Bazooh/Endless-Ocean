@@ -128,14 +128,15 @@ function createGeometry(n_vertices, chunk_size, noise) {
         const vy = vertices[i + 1] / ratio.y;
         const vz = vertices[i + 2] / ratio.z;
 
+        // The normal is the gradient of the noise function
         const delta = 0.05;
-        const nx = (noise(vx + delta, vy, vz) - noise(vx - delta, vy, vz)) / (2 * delta);
-        const ny = (noise(vx, vy + delta, vz) - noise(vx, vy - delta, vz)) / (2 * delta);
-        const nz = (noise(vx, vy, vz + delta) - noise(vx, vy, vz - delta)) / (2 * delta);
+        const nx = (noise(vx - delta, vy, vz) - noise(vx + delta, vy, vz)) / (2 * delta);
+        const ny = (noise(vx, vy - delta, vz) - noise(vx, vy + delta, vz)) / (2 * delta);
+        const nz = (noise(vx, vy, vz - delta) - noise(vx, vy, vz + delta)) / (2 * delta);
 
         const length = Math.sqrt(nx*nx + ny*ny + nz*nz);
 
-        normals.push(-nx / length, -ny / length, -nz / length);
+        normals.push(nx / length, ny / length, nz / length);
     }
 
     geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
@@ -150,7 +151,7 @@ export function createMarchingCubes(noise, chunk_size, n_vertices = new THREE.Ve
     if (n_vertices.x * n_vertices.y * n_vertices.z > 10_000) throw new Error('Too much vertices : ' + n_vertices.x + ' x ' + n_vertices.y + ' x ' + n_vertices.z + ' = ' + n_vertices.x * n_vertices.y * n_vertices.z + ' > 10_000');
 
     const geometry = createGeometry(n_vertices, chunk_size, noise);
-    const material = new THREE.ShaderMaterial({side: THREE.DoubleSide, wireframe: false});
+    const material = new THREE.ShaderMaterial({side: THREE.DoubleSide, wireframe: false, depthTest: true, depthWrite: true});
     addShader('terrain', material, Object.assign({uTime: 0}, getLightUniforms()));
     const mesh = new THREE.Mesh(geometry, material);
 

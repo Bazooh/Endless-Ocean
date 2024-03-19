@@ -8,5 +8,7 @@ void main() {
 
     const vec3 oceanColor = vec3(0.0, 0.0, 0.3);
 
-    gl_FragColor = mix(diffuse, vec4(oceanColor, 1.0), 0.5);
+    vec3 color = mix(oceanColor, diffuse.rgb, 0.5);
+
+    gl_FragColor = vec4(color, diffuse.a);
 }

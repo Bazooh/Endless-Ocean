@@ -1,5 +1,6 @@
 varying vec3 worldPosition;
 varying vec3 vNormal;
+varying float depth;
 
 uniform mat4 model;
 

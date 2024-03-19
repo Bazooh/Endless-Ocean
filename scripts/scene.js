@@ -67,7 +67,7 @@ updatePlayerGUI(gui, player);
 updateCameraGUI(gui, controls, player);
 updateLightGUI(gui, player);
 
-const map_size = new THREE.Vector3(6, surface_level - floor_level, 6);
+const map_size = new THREE.Vector3(10, surface_level - floor_level, 10);
 createChunks(new THREE.Vector3(-3, floor_level, -3), map_size);
 
 function animate() {
