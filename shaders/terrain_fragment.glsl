@@ -51,5 +51,4 @@ void main() {
     color = apply_lighting(color);
 
     gl_FragColor = vec4(color, 1.0);
-    // gl_FragColor = vec4(depth, depth, depth, 1.0);
 }

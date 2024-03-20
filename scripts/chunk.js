@@ -2,10 +2,13 @@ import * as THREE from 'three';
 import { createNoise } from './noise.js';
 import { createMarchingCubes, getLocalNormal } from "./marching_cubes.js";
 import { scene } from './scene.js';
+import { addShader } from './shader.js';
+import { getLightUniforms } from './light.js';
+import { createWaterGeometry } from './water.js';
 
 
-const chunk_size = new THREE.Vector3(10, 10, 10);
-const n_vertices = new THREE.Vector3(16, 16, 16);
+export const chunk_size = new THREE.Vector3(10, 10, 10);
+export const n_vertices = new THREE.Vector3(16, 16, 16);
 
 export const surface_level = 0;
 export const floor_level = -4;
@@ -75,6 +78,16 @@ export function updateChunksShaderUniforms(uniforms) {
 }
 
 
+export function updateChunksShaderTime() {
+    updateChunksShaderUniforms({
+        uTime: performance.now()
+    });
+    Object.values(chunk_lines).forEach((chunkLine) => {
+        chunkLine.water.material.uniforms.uTime.value = performance.now();
+    });
+}
+
+
 class chunk {
 
     constructor(x, y, z) {
@@ -113,11 +126,15 @@ class chunk {
             return;
         }
 
-        this.mesh = createMarchingCubes(
+        const geometry = createMarchingCubes(
             (x, y, z) => noise(x/n_vertices.x + this.x, y/n_vertices.y + this.y, z/n_vertices.z + this.z),
             chunk_size,
             n_vertices
         );
+        const material = new THREE.ShaderMaterial({side: THREE.DoubleSide, wireframe: false});
+        addShader('terrain', material, Object.assign({uTime: 0}, getLightUniforms()));
+        this.mesh = new THREE.Mesh(geometry, material);
+
         this.position.set(this.x * chunk_size.x, this.y * chunk_size.y, this.z * chunk_size.z);
         scene.add(this.mesh);
     }
@@ -159,6 +176,7 @@ class verticalChunkLine {
         this.x = x;
         this.z = z;
         this.chunks = {};
+        this.water = null;
 
         for (let y = floor_level; y < surface_level; y++) {
             this.chunks[y] = new chunk(x, y, z);
@@ -178,6 +196,15 @@ class verticalChunkLine {
             chunk.load();
         });
 
+        const water_geometry = createWaterGeometry();
+        const water_material = new THREE.ShaderMaterial({side: THREE.DoubleSide, wireframe: false, transparent: true});
+        addShader('water', water_material, {uTime: performance.now()});
+        this.water = new THREE.Mesh(water_geometry, water_material);
+
+        this.water.position.set(this.x * chunk_size.x, surface_level, this.z * chunk_size.z);
+        this.water.rotation.x = -Math.PI / 2;
+        scene.add(this.water);
+
         chunk_lines[this.id] = this;
     }
 
@@ -186,6 +213,10 @@ class verticalChunkLine {
         Object.values(this.chunks).forEach((chunk) => {
             chunk.unload();
         });
+
+        this.water.geometry.dispose();
+        this.water.material.dispose();
+        scene.remove(this.water);
 
         delete chunk_lines[this.id];
     }

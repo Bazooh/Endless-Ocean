@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'control';
-import { createChunksFromTopToBottom } from './chunk.js';
+import { createChunksFromTopToBottom, updateChunksShaderTime } from './chunk.js';
 import { updateNoiseGUI } from './noise.js';
 import { GUI } from 'dat.gui';
 import { Player, updatePlayerGUI } from './entities/Player/player.js';
@@ -46,7 +46,7 @@ const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 
 addShader(
-    'water',
+    'postprocessing',
     {},
     {
         tDiffuse: null,
@@ -82,6 +82,8 @@ function animate() {
     // update water shader
     if (composer.passes[1] !== undefined)
         composer.passes[1].uniforms.uTime.value = performance.now();
+
+    updateChunksShaderTime();
 
     composer.render();
 }
