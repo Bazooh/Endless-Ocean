@@ -45,7 +45,16 @@ document.body.appendChild(renderer.domElement);
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 
-addShader('water', {}, {tDiffuse: {value: null}}).then(([shader, _]) => composer.addPass(new ShaderPass(shader)));
+addShader(
+    'water',
+    {},
+    {
+        tDiffuse: null,
+        uTime: performance.now()
+    }
+).then(([shader, _]) => {
+    composer.addPass(new ShaderPass(shader));
+});
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.update();
@@ -69,6 +78,10 @@ function animate() {
     requestAnimationFrame(animate);
 
     updateEntities();
+    
+    // update water shader
+    if (composer.passes[1] !== undefined)
+        composer.passes[1].uniforms.uTime.value = performance.now();
 
     composer.render();
 }
@@ -80,8 +93,7 @@ function ResizeWindow() {
     renderer.setSize(window.innerWidth,window.innerHeight);
     camera.aspect = window.innerWidth/window.innerHeight;
     camera.updateProjectionMatrix();
-    renderer.render(scene,camera);
-    // composer.render();
+    composer.render();
 };
 
 
