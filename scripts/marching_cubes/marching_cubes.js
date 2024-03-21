@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { edgeTable, triTable } from './marching_cubes_tables.js';
-import { noise_param } from './noise.js';
+import { edgeTable, triTable } from './tables.js';
+import { noise_param } from '../noise.js';
 
 
 const epsilon = 0.05;
@@ -81,7 +81,7 @@ function getVertices(noise_values, x, y, z, edges, ratio) {
     if (edges & 256) {
         indices[8] = vertices.length / 3;
         const mu = (noise_param.threshold - noise_values[x][y][z]) / (noise_values[x][y][z + 1] - noise_values[x][y][z]);
-        vertices.push(x*ratio.x, y*ratio.y, (z + mu)*ratio.z)
+        vertices.push(x*ratio.x, y*ratio.y, (z + mu)*ratio.z);
     }
     if (edges & 512) {
         indices[9] = vertices.length / 3;

@@ -4,7 +4,7 @@ import { Entity, forward } from '../entity.js';
 import {Input} from './input.js';
 import { FollowCamera } from './followCamera.js';
 import { canMoveTo, updateChunksShaderUniforms, getChunkLineByWorldPos, getChunkLinePosByWorldPos, createChunksFromTopToBottom, chunk_lines } from '../../chunk.js';
-import { light_param } from '../../light.js';
+import { getLightDirection } from '../../light.js';
 
 
 const up = new THREE.Vector3(0, 1, 0);
@@ -120,16 +120,8 @@ export class Player extends Entity {
 
     updateLightDirection() {
         if (this.model === undefined) return;
-
-        const theta = light_param.direction_theta;
-        const phi = light_param.direction_phi - Math.acos(forward.dot(this.direction))*Math.sign(this.direction.x);
-    
-        const direction = new THREE.Vector3(
-            Math.sin(phi) * Math.sin(theta),
-            Math.cos(theta),
-            Math.cos(phi) * Math.sin(theta)
-        );
-        updateChunksShaderUniforms({'uLightDir': direction});
+        
+        updateChunksShaderUniforms({'uLightDir': getLightDirection(this.direction)});
     }
 
 

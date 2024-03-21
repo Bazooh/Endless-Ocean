@@ -1,25 +1,37 @@
 import * as THREE from 'three';
 import { updateChunksShaderUniforms } from './chunk.js';
+import { forward } from './entities/entity.js';
 
 
-export function getLightUniforms() {
+export function getLightUniforms(player) {
     return {
-        uLightPos: new THREE.Vector3(0, 0, 0),
-        uLightIntensity:  100.0,
-        uLightColor: new THREE.Color(0xffffff),
-        uLightDir: new THREE.Vector3(0, 0, 0),
-        uLightAngle: 1.0
+        uLightPos: player?.position,
+        uLightIntensity:  light_param.intensity,
+        uLightColor: new THREE.Color(light_param.color),
+        uLightDir: getLightDirection(player?.direction || forward),
+        uLightAngle: light_param.angle
     };
 }
 
 
 export const light_param = {
-    position: new THREE.Vector3(0, 10, 0),
     intensity: 100.0,
     color: 0xffffff,
     direction_theta: 2.2,
     direction_phi: Math.PI,
     angle: 1.0
+}
+
+
+export function getLightDirection(base_direction) {
+    const theta = light_param.direction_theta;
+    const phi = light_param.direction_phi - Math.acos(forward.dot(base_direction))*Math.sign(base_direction.x);
+
+    return new THREE.Vector3(
+        Math.sin(phi) * Math.sin(theta),
+        Math.cos(theta),
+        Math.cos(phi) * Math.sin(theta)
+    );
 }
 
 

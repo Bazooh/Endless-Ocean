@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { createNoise } from './noise.js';
-import { createMarchingCubes, getLocalNormal } from "./marching_cubes.js";
+import { createMarchingCubes, getLocalNormal } from "./marching_cubes/marching_cubes.js";
 import { scene } from './scene.js';
 import { addShader } from './shader.js';
 import { getLightUniforms } from './light.js';
