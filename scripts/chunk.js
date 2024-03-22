@@ -104,15 +104,15 @@ class chunk {
     }
 
     get geometry() {
-        return this.mesh.geometry;
+        return this.mesh?.geometry;
     }
 
     get material() {
-        return this.mesh.material;
+        return this.mesh?.material;
     }
 
     get position() {
-        return this.mesh.position;
+        return this.mesh?.position;
     }
 
 
@@ -160,6 +160,10 @@ class chunk {
 
     updateShaderUniforms(uniforms) {
         Object.keys(uniforms).forEach((key) => {
+            if (this.material === undefined) {
+                return;
+            }
+
             if (this.material.uniforms[key] === undefined) {
                 return;
             }

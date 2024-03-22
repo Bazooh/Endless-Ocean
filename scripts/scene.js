@@ -11,6 +11,8 @@ import { addShader } from './shader.js';
 import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'https://cdn.jsdelivr.net/npm/three/examples/jsm/postprocessing/ShaderPass.js';
+import { Module } from '../build/marching_cubes/marching_cubes.js';
+import { createMarchingCubes } from './marching_cubes/marching_cubes.js';
 
 const playerSpawn = {
     position: {

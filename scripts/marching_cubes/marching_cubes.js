@@ -4,6 +4,7 @@ import { noise_param } from '../noise.js';
 
 
 const epsilon = 0.05;
+const N_VERTICES_MAX = 10_000;
 
 
 export function getLocalNormal(x, y, z, noise) {
@@ -152,8 +153,55 @@ function createGeometry(n_vertices, chunk_size, local_noise) {
 }
 
 
-export function createMarchingCubes(local_noise, chunk_size, n_vertices = new THREE.Vector3(20, 20, 20)) {
-    if (n_vertices.x * n_vertices.y * n_vertices.z > 10_000) throw new Error('Too much vertices : ' + n_vertices.x + ' x ' + n_vertices.y + ' x ' + n_vertices.z + ' = ' + n_vertices.x * n_vertices.y * n_vertices.z + ' > 10_000');
+export function createMarchingCubes(local_noise, chunk_size, n_vertices) {
+    if (n_vertices.x * n_vertices.y * n_vertices.z > N_VERTICES_MAX)
+        throw new Error('Too much vertices : ' + n_vertices.x + ' x ' + n_vertices.y + ' x ' + n_vertices.z + ' = ' + n_vertices.x * n_vertices.y * n_vertices.z + ' > ' + N_VERTICES_MAX);
 
     return createGeometry(n_vertices, chunk_size, local_noise);
 }
+
+
+// export function createMarchingCubes(chunk_idx, n_vertices, chunk_size, noise_frequency, threshold) {
+//     if (n_vertices.x * n_vertices.y * n_vertices.z > N_VERTICES_MAX)
+//         throw new Error('Too much vertices : ' + n_vertices.x + ' x ' + n_vertices.y + ' x ' + n_vertices.z + ' = ' + n_vertices.x * n_vertices.y * n_vertices.z + ' > ' + N_VERTICES_MAX + ' (N_VERTICES_MAX)');
+
+//     const pointer = wasm.ccall(
+//         'getGeometryAttributes',
+//         'number',
+//         ['number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number', 'number'],
+//         [
+//             chunk_idx.x, chunk_idx.y, chunk_idx.z,
+//             n_vertices.x, n_vertices.y, n_vertices.z,
+//             chunk_size.x, chunk_size.y, chunk_size.z,
+//             noise_frequency.x, noise_frequency.y, noise_frequency.z,
+//             threshold
+//         ]
+//     );
+
+//     const output = wasm.HEAP32.subarray(pointer / 4, pointer / 4 + 6);
+
+//     const positions_pointer = output[0];
+//     const positions_size = output[1];
+
+//     const normals_pointer = output[2];
+//     const normals_size = output[3];
+
+//     const indices_pointer = output[4];
+//     const indices_size = output[5];
+
+//     const positions = Float32Array.from(wasm.HEAPF32.subarray(positions_pointer / 4, positions_pointer / 4 + positions_size));
+//     const normals = Float32Array.from(wasm.HEAPF32.subarray(normals_pointer / 4, normals_pointer / 4 + normals_size));
+//     const indices = Uint32Array.from(wasm.HEAPU32.subarray(indices_pointer / 4, indices_pointer / 4 + indices_size));
+
+//     const geometry = new THREE.BufferGeometry();
+//     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+//     geometry.setAttribute('normal', new THREE.BufferAttribute(normals, 3));
+//     geometry.setIndex(new THREE.BufferAttribute(indices, 1));
+
+//     wasm._free(pointer);
+//     wasm._free(positions_pointer);
+//     wasm._free(normals_pointer);
+//     wasm._free(indices_pointer);
+
+//     return geometry;
+// }
