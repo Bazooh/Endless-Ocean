@@ -1,11 +1,59 @@
 uniform sampler2D tDiffuse;
+uniform sampler2D tDepth;
 uniform float uTime;
+uniform vec3 uCameraPosition;
+uniform float uTanHalfFov;
+uniform float uAspectRatio;
 
 varying vec2 vUv;
 
 
+const float densityAttenuation = 0.1;
+const float sunDistance = 100.0;
+const float rayLength = 100.0;
+
+const int rayNumberOfPoints = 10;
+
+
 vec2 distort(vec2 uv, vec2 amplitude, vec2 frequency, vec2 phase) {
     return uv + amplitude * sin(uv * frequency + phase);
+}
+
+
+bool isAtmoshepere(float depth) {
+    return depth == 0.0 && uCameraPosition.y >= 0.0;
+}
+
+
+float getDensity(vec3 pos) {
+    if (pos.y < 0.0) {
+        return 0.0;
+    }
+
+    return (1.0 - pos.y) * exp(-pos.y * densityAttenuation);
+}
+
+
+float getOpticalDensity(vec3 pos) {
+    float beta = densityAttenuation*sunDistance;
+    float theta = exp(-beta);
+    
+    return (-sunDistance + beta + theta*sunDistance - beta*theta + beta*sunDistance*theta) / (beta*densityAttenuation);
+}
+
+
+vec3 getAtmosphereColor() {
+    const vec3 skyColor = vec3(0.46, 0.72, 1.0);
+    return skyColor;
+}
+
+
+
+
+
+// WARNING : This should not work if the camera is looking up or down
+float dy_dz(vec2 uv) {
+    return uv.y * uTanHalfFov;
 }
 
 
@@ -20,5 +68,12 @@ void main() {
 
     vec3 color = mix(oceanColor, diffuse.rgb, 0.5);
 
-    gl_FragColor = vec4(color, diffuse.a);
+    float depth = texture2D(tDepth, uv).r;
+
+    if (isAtmoshepere(depth)) {
+        gl_FragColor = vec4(getAtmosphereColor(), 1.0);
+        return;
+    }
+
+    gl_FragColor = vec4(color, 1.0);
 }

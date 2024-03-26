@@ -23,5 +23,7 @@ export function addShader(shader, material = {}, uniforms = {}) {
             return material;
     });
 
+    material.isShaderMaterial = true;
+
     return Promise.all([vertexPromise, fragmentPromise]);
 }

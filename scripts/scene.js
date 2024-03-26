@@ -52,7 +52,11 @@ addShader(
     {},
     {
         tDiffuse: null,
-        uTime: performance.now()
+        tDepth: null,
+        uTime: performance.now(),
+        uCameraPosition: camera.position,
+        uTanHalfFov: Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)),
+        uAspectRatio: camera.aspect
     }
 ).then(([shader, _]) => {
     composer.addPass(new ShaderPass(shader));
@@ -81,9 +85,14 @@ function animate() {
 
     updateEntities();
     
-    // update water shader
-    if (composer.passes[1] !== undefined)
+    // update post-processing shader
+    if (composer.passes[1] !== undefined) {
         composer.passes[1].uniforms.uTime.value = performance.now();
+        composer.passes[1].uniforms.tDepth.value = composer.renderTarget2.texture;
+        composer.passes[1].uniforms.uCameraPosition.value = camera.position;
+        composer.passes[1].uniforms.uTanHalfFov.value = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+        composer.passes[1].uniforms.uAspectRatio.value = camera.aspect;
+    }
 
     updateChunksShaderTime();
 
@@ -94,8 +103,8 @@ animate();
 
 //Resize Screen
 function ResizeWindow() {
-    renderer.setSize(window.innerWidth,window.innerHeight);
-    camera.aspect = window.innerWidth/window.innerHeight;
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     composer.render();
 };
