@@ -2,6 +2,13 @@ import * as THREE from 'three';
 
 const forward = new THREE.Vector3(0,0,-1);
 
+var raycaster = new THREE.Raycaster();
+var dir = new THREE.Vector3;
+var far = new THREE.Vector3;
+
+const offsetPastWall = 0.2;
+
+
 
 export const camera_param = {
     updateCamera: true,
@@ -35,11 +42,12 @@ export function updateCameraGUI(gui, controls, player) {
 }
 
 export class FollowCamera {
-    constructor(camera, player) {
+    constructor(camera, player, scene) {
         this.camera = camera;
         this.player = player;
         this.position = new THREE.Vector3();
         this.lookPos = new THREE.Vector3();
+        this.scene = scene;
 
         this.position.copy(this.getTargetPosition());
         this.lookPos.copy(this.getTargetLook());
@@ -70,7 +78,28 @@ export class FollowCamera {
 
         if (!camera_param.updateCamera) return;
 
-        this.camera.position.copy(this.position);
+        var distancePastWall = this.distancePastWall();
+        if (distancePastWall > 0) {
+            
+           var direction = dir.subVectors(this.player.position, this.position).normalize();
+           var move = direction.multiplyScalar(distancePastWall + offsetPastWall);
+
+           this.camera.position.copy( this.position.clone().add(move));
+        }
+        else this.camera.position.copy(this.position);
+       
         this.camera.lookAt(this.lookPos);
+        
+    }
+
+    distancePastWall() {
+        raycaster.set(this.position, dir.subVectors(this.player.position, this.position).normalize());
+        raycaster.far = far.subVectors(this.position, this.player.position).length();
+        raycaster.layers.set(1);
+        var intersects = raycaster.intersectObjects(this.scene.children, true) ;
+        if (intersects.length > 0) {
+            return intersects[intersects.length - 1].distance;
+        }
+        return 0;
     }
 }

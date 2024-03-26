@@ -17,7 +17,7 @@ import { createMarchingCubes } from './marching_cubes/marching_cubes.js';
 const playerSpawn = {
     position: {
         x: 0,
-        y: 0,
+        y: -0.5,
         z: 0
     },
     direction: {
@@ -68,6 +68,7 @@ controls.update();
 const player = new Player(
     new THREE.Vector3(playerSpawn.position.x, playerSpawn.position.y, playerSpawn.position.z),
     new THREE.Vector3(playerSpawn.direction.x, playerSpawn.direction.y, playerSpawn.direction.z),
+    scene,
     view_distance
 );
 

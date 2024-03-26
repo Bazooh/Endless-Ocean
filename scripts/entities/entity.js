@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import {scene} from '../scene.js';
 
 
 const entities = [];
@@ -23,12 +22,13 @@ export class Entity {
             this.model.quaternion.copy(new THREE.Quaternion().setFromUnitVectors(forward, this.direction));
     }
 
-    constructor(starting_position, starting_direction) {
+    constructor(starting_position, starting_direction, scene) {
         this.direction = starting_direction;
         this.position = starting_position;
         this.velocity = new THREE.Vector3();
         this.acceleration = new THREE.Vector3();
         this.prev_time = performance.now();
+        this.scene = scene;
         
         entities.push(this);
 
@@ -49,7 +49,7 @@ export class Entity {
 
     addToScene() {
         if (this.model != null) {
-            scene.add(this.model);
+            this.scene.add(this.model);
         }
        
     }

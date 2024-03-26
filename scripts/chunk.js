@@ -136,6 +136,7 @@ class chunk {
         this.mesh = new THREE.Mesh(geometry, material);
 
         this.position.set(this.x * chunk_size.x, this.y * chunk_size.y, this.z * chunk_size.z);
+        this.mesh.layers.enable(1);
         scene.add(this.mesh);
     }
 

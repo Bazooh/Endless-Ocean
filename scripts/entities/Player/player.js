@@ -1,14 +1,17 @@
 import * as THREE from 'three';
-import { camera, scene } from '../../scene.js';
+import { camera } from '../../scene.js';
 import { Entity, forward } from '../entity.js';
 import {Input} from './input.js';
 import { FollowCamera } from './followCamera.js';
 import { canMoveTo, updateChunksShaderUniforms, getChunkLineByWorldPos, getChunkLinePosByWorldPos, createChunksFromTopToBottom, chunk_lines } from '../../chunk.js';
 import { getLightDirection } from '../../light.js';
+import {PLYLoader} from 'PLYLoader';
 
 
 const up = new THREE.Vector3(0, 1, 0);
 const zero = new THREE.Vector3(0, 0, 0);
+
+const maxHeight = -0.5;
 
 export const player_param = {
     enableCollisions: true,
@@ -32,21 +35,24 @@ export function updatePlayerGUI(gui, player) {
 
 /*
 TODO
-- Mouse Control Camera?
-- Collisions
+- Full Collisions
 - Player Model
-- Lighting
+- Camera Cutting
 */
 
 export class Player extends Entity {
 
-    constructor(starting_position, starting_direction, view_distance) {
-        super(starting_position, starting_direction);
+    constructor(starting_position, starting_direction, scene, view_distance) {
+        super(starting_position, starting_direction, scene);
         this.view_distance = view_distance;
     }
 
 
     loadModel() {
+        var loader = new PLYLoader();
+
+        //Load player model here
+
         this.model = new THREE.Object3D();
         this.mesh = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 2, 16), new THREE.MeshBasicMaterial({color: 0xaaaaff}));
         this.mesh.rotation.set(Math.PI / 2, 0, 0);
@@ -55,7 +61,7 @@ export class Player extends Entity {
     
         this.input = new Input();
 
-        this.followCamera = new FollowCamera(camera, this);
+        this.followCamera = new FollowCamera(camera, this, this.scene);
     }
 
 
@@ -153,6 +159,7 @@ export class Player extends Entity {
         this.velocity.add(this.acceleration.clone().multiplyScalar(delta_time));
 
         var targetPosition = this.position.clone().add(this.velocity.clone().multiplyScalar(delta_time));
+        if (targetPosition.y > maxHeight) targetPosition.y = maxHeight;
 
         //Position
         if (this.checkInWall(targetPosition)) {
