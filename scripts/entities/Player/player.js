@@ -12,6 +12,7 @@ const up = new THREE.Vector3(0, 1, 0);
 const zero = new THREE.Vector3(0, 0, 0);
 
 const maxHeight = -0.5;
+var modelOffset = new THREE.Vector3(0, -0.5, 0);
 
 export const player_param = {
     enableCollisions: true,
@@ -36,8 +37,7 @@ export function updatePlayerGUI(gui, player) {
 /*
 TODO
 - Full Collisions
-- Player Model
-- Camera Cutting
+- Player Material
 */
 
 export class Player extends Entity {
@@ -47,18 +47,42 @@ export class Player extends Entity {
         this.view_distance = view_distance;
     }
 
+    onModelLoaded(geometry) {
+
+        geometry.computeVertexNormals();
+        geometry.computeBoundingBox();
+
+        var size = new THREE.Vector3();
+        geometry.boundingBox.getSize(size);
+
+        var sca = new THREE.Matrix4();
+        var ScaleFact=5/size.length();
+        sca.makeScale(ScaleFact,ScaleFact,ScaleFact);
+
+        var material = new THREE.MeshBasicMaterial({color: 0xaaaaff});
+        this.mesh = new THREE.Mesh( geometry, material );
+
+        this.mesh.applyMatrix4(sca);
+        this.mesh.position.add(modelOffset);
+        this.mesh.rotation.set(Math.PI, 0, 0);
+
+        this.model.add(this.mesh);
+
+        //Test Cylinder
+        // var testMesh = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 2, 16), new THREE.MeshBasicMaterial({color: 0xaaaaff}));
+        // testMesh.rotation.set(Math.PI / 2, 0, 0);
+        // this.model.add(testMesh);
+        // testMesh.material.transparent = true;
+        // testMesh.material.opacity = 0.5;
+    }
+
 
     loadModel() {
         var loader = new PLYLoader();
 
-        //Load player model here
-
         this.model = new THREE.Object3D();
-        this.mesh = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 2, 16), new THREE.MeshBasicMaterial({color: 0xaaaaff}));
-        this.mesh.rotation.set(Math.PI / 2, 0, 0);
+        loader.load('../../../models/Cartoon Submarine.ply', (geometry) => this.onModelLoaded(geometry));
 
-        this.model.add(this.mesh);
-    
         this.input = new Input();
 
         this.followCamera = new FollowCamera(camera, this, this.scene);
