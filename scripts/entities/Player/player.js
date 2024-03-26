@@ -68,6 +68,8 @@ export class Player extends Entity {
 
         this.model.add(this.mesh);
 
+        this.modelLoaded = true;
+
         //Test Cylinder
         // var testMesh = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 2, 16), new THREE.MeshBasicMaterial({color: 0xaaaaff}));
         // testMesh.rotation.set(Math.PI / 2, 0, 0);
@@ -86,6 +88,13 @@ export class Player extends Entity {
         this.input = new Input();
 
         this.followCamera = new FollowCamera(camera, this, this.scene);
+    }
+
+    setTransparent(transparent) {
+        if (!this.modelLoaded) return;
+
+        this.mesh.visible = !transparent;
+
     }
 
 

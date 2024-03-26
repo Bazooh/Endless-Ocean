@@ -7,6 +7,7 @@ var dir = new THREE.Vector3;
 var far = new THREE.Vector3;
 
 const offsetPastWall = 0.2;
+const hidePlayerDistance = 1.5;
 
 
 
@@ -81,12 +82,19 @@ export class FollowCamera {
         var distancePastWall = this.distancePastWall();
         if (distancePastWall > 0) {
             
-           var direction = dir.subVectors(this.player.position, this.position).normalize();
-           var move = direction.multiplyScalar(distancePastWall + offsetPastWall);
+           var cameraToPlayerVector = dir.subVectors(this.player.position, this.position);
+           var move = cameraToPlayerVector.normalize().multiplyScalar(distancePastWall + offsetPastWall);
+           var newPos = this.position.clone().add(move);
 
-           this.camera.position.copy( this.position.clone().add(move));
+           var distanceToPlayer = newPos.distanceTo(this.player.position);
+           this.player.setTransparent(distanceToPlayer < hidePlayerDistance);
+
+           this.camera.position.copy(newPos);
         }
-        else this.camera.position.copy(this.position);
+        else {
+            this.player.setTransparent(false);
+            this.camera.position.copy(this.position);
+        }
        
         this.camera.lookAt(this.lookPos);
         
