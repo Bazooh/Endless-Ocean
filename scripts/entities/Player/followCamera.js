@@ -2,6 +2,14 @@ import * as THREE from 'three';
 
 const forward = new THREE.Vector3(0,0,-1);
 
+var raycaster = new THREE.Raycaster();
+var dir = new THREE.Vector3;
+var far = new THREE.Vector3;
+
+const offsetPastWall = 0.2;
+const hidePlayerDistance = 1.5;
+
+
 
 export const camera_param = {
     updateCamera: true,
@@ -70,7 +78,35 @@ export class FollowCamera {
 
         if (!camera_param.updateCamera) return;
 
-        this.camera.position.copy(this.position);
+        var distancePastWall = this.distancePastWall();
+        if (distancePastWall > 0) {
+            
+           var cameraToPlayerVector = dir.subVectors(this.player.position, this.position);
+           var move = cameraToPlayerVector.normalize().multiplyScalar(distancePastWall + offsetPastWall);
+           var newPos = this.position.clone().add(move);
+
+           var distanceToPlayer = newPos.distanceTo(this.player.position);
+           this.player.setTransparent(distanceToPlayer < hidePlayerDistance);
+
+           this.camera.position.copy(newPos);
+        }
+        else {
+            this.player.setTransparent(false);
+            this.camera.position.copy(this.position);
+        }
+       
         this.camera.lookAt(this.lookPos);
+        
+    }
+
+    distancePastWall() {
+        raycaster.set(this.position, dir.subVectors(this.player.position, this.position).normalize());
+        raycaster.far = far.subVectors(this.position, this.player.position).length();
+        raycaster.layers.set(1);
+        var intersects = raycaster.intersectObjects(scene.children, true) ;
+        if (intersects.length > 0) {
+            return intersects[intersects.length - 1].distance;
+        }
+        return 0;
     }
 }

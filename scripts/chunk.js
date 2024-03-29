@@ -137,6 +137,7 @@ class chunk {
             const material = new THREE.ShaderMaterial({side: THREE.DoubleSide, wireframe: false});
             addShader('terrain', material, Object.assign({uTime: 0}, getLightUniforms())).then(() => {
                 this.mesh = new THREE.Mesh(geometry, material);
+                this.mesh.layers.enable(1);
                 scene.add(this.mesh);
             });
         });

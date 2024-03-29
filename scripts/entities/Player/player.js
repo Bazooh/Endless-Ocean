@@ -5,10 +5,14 @@ import {Input} from './input.js';
 import { FollowCamera } from './followCamera.js';
 import { canMoveTo, updateChunksShaderUniforms, getChunkLineByWorldPos, getChunkLinePosByWorldPos, createChunksFromTopToBottom, chunk_lines } from '../../chunk.js';
 import { getLightDirection } from '../../light.js';
+import {PLYLoader} from 'PLYLoader';
 
 
 const up = new THREE.Vector3(0, 1, 0);
 const zero = new THREE.Vector3(0, 0, 0);
+
+const maxHeight = -0.5;
+var modelOffset = new THREE.Vector3(0, -0.5, 0);
 
 export const player_param = {
     enableCollisions: true,
@@ -32,10 +36,8 @@ export function updatePlayerGUI(gui, player) {
 
 /*
 TODO
-- Mouse Control Camera?
-- Collisions
-- Player Model
-- Lighting
+- Full Collisions
+- Player Material
 */
 
 export class Player extends Entity {
@@ -44,17 +46,54 @@ export class Player extends Entity {
         super(starting_position, starting_direction, {view_distance: view_distance});
     }
 
+    onModelLoaded(geometry) {
 
-    loadModel() {
-        this.model = new THREE.Object3D();
-        this.mesh = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 2, 16), new THREE.MeshBasicMaterial({color: 0xaaaaff}));
-        this.mesh.rotation.set(Math.PI / 2, 0, 0);
+        geometry.computeVertexNormals();
+        geometry.computeBoundingBox();
+
+        var size = new THREE.Vector3();
+        geometry.boundingBox.getSize(size);
+
+        var sca = new THREE.Matrix4();
+        var ScaleFact=5/size.length();
+        sca.makeScale(ScaleFact,ScaleFact,ScaleFact);
+
+        var material = new THREE.MeshBasicMaterial({color: 0xaaaaff});
+        this.mesh = new THREE.Mesh( geometry, material );
+
+        this.mesh.applyMatrix4(sca);
+        this.mesh.position.add(modelOffset);
+        this.mesh.rotation.set(Math.PI, 0, 0);
 
         this.model.add(this.mesh);
-    
+
+        this.modelLoaded = true;
+
+        //Test Cylinder
+        // var testMesh = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 2, 16), new THREE.MeshBasicMaterial({color: 0xaaaaff}));
+        // testMesh.rotation.set(Math.PI / 2, 0, 0);
+        // this.model.add(testMesh);
+        // testMesh.material.transparent = true;
+        // testMesh.material.opacity = 0.5;
+    }
+
+
+    loadModel() {
+        var loader = new PLYLoader();
+
+        this.model = new THREE.Object3D();
+        loader.load('../../../models/Cartoon Submarine.ply', (geometry) => this.onModelLoaded(geometry));
+
         this.input = new Input();
 
         this.followCamera = new FollowCamera(camera, this);
+    }
+
+    setTransparent(transparent) {
+        if (!this.modelLoaded) return;
+
+        this.mesh.visible = !transparent;
+
     }
 
 
@@ -151,6 +190,7 @@ export class Player extends Entity {
         this.velocity.add(this.acceleration.clone().multiplyScalar(delta_time));
 
         var targetPosition = this.position.clone().add(this.velocity.clone().multiplyScalar(delta_time));
+        if (targetPosition.y > maxHeight) targetPosition.y = maxHeight;
 
         //Position
         if (this.checkInWall(targetPosition)) {

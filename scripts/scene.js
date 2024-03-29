@@ -15,7 +15,7 @@ import { ShaderPass } from 'https://cdn.jsdelivr.net/npm/three/examples/jsm/post
 const playerSpawn = {
     position: {
         x: 0,
-        y: 0,
+        y: -0.5,
         z: 0
     },
     direction: {

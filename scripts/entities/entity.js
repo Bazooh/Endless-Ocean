@@ -12,6 +12,7 @@ export function updateEntities() {
     });
 }
 
+
 export class Entity {
 
     get direction() {return this._direction;}
@@ -33,6 +34,7 @@ export class Entity {
         
         entities.push(this);
 
+        this.modelLoaded = false;
         this.loadModel();
         this.addToScene();
     }
