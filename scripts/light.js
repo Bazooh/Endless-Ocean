@@ -5,7 +5,7 @@ import { forward } from './entities/entity.js';
 
 export function getLightUniforms(player) {
     return {
-        uLightPos: player?.position,
+        uLightPos: player?.position || new THREE.Vector3(0, 0, 0),
         uLightIntensity:  light_param.intensity,
         uLightColor: new THREE.Color(light_param.color),
         uLightDir: getLightDirection(player?.direction || forward),

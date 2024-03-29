@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { camera, scene } from '../../scene.js';
-import { Entity, forward } from '../entity.js';
+import { camera } from '../../scene.js';
+import { Entity } from '../entity.js';
 import {Input} from './input.js';
 import { FollowCamera } from './followCamera.js';
 import { canMoveTo, updateChunksShaderUniforms, getChunkLineByWorldPos, getChunkLinePosByWorldPos, createChunksFromTopToBottom, chunk_lines } from '../../chunk.js';
@@ -41,8 +41,7 @@ TODO
 export class Player extends Entity {
 
     constructor(starting_position, starting_direction, view_distance) {
-        super(starting_position, starting_direction);
-        this.view_distance = view_distance;
+        super(starting_position, starting_direction, {view_distance: view_distance});
     }
 
 
@@ -68,7 +67,7 @@ export class Player extends Entity {
         super.position = new_position;
         const new_chunk_line = this.current_chunk_line;
 
-        if (old_chunk_line !== new_chunk_line) {
+        if (old_chunk_line !== new_chunk_line || new_chunk_line === undefined) {
             this.loadSurroundingChunks();
             this.unloadFarChunks();
         }
@@ -141,7 +140,6 @@ export class Player extends Entity {
 
 
     update(delta_time) {
-
         //Acceleration based on input
         this.acceleration = this.direction.clone().multiplyScalar(this._getAxis(this.input.forward, this.input.backward) * player_param.horizontalAcceleration);
         this.acceleration.add(up.clone().multiplyScalar(this._getAxis(this.input.up, this.input.down) * player_param.verticalAcceleration));
