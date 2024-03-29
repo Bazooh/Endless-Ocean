@@ -1,4 +1,8 @@
 varying vec2 worldPosition;
+varying vec3 vNormal;
+
+
+const vec3 sunPosition = vec3(-10000.0, 5000.0, 0.0);
 
 
 vec3 mod289(vec3 x) {
@@ -38,6 +42,19 @@ float snoise(vec2 v) {
 }
 
 
+float getLighting() {
+    vec3 normal = normalize(vNormal + 0.0005*vec3(snoise(5.0*worldPosition)));
+    vec3 lightDir = normalize(sunPosition - vec3(worldPosition.x, 0.0, worldPosition.y));
+    float lightIntensity = max(dot(normal, lightDir), 0.01);
+
+    vec2 lookingDir = worldPosition - cameraPosition.xz;
+
+    lightIntensity *= exp(-0.2*abs(dot(lookingDir, lightDir.zx)));
+
+    return lightIntensity;
+}
+
+
 void main() {
     const vec4 waterColor = vec4(0.26, 0.36, 1.0, 0.4);
 
@@ -49,6 +66,7 @@ void main() {
     vec4 noiseColor = vec4(0.2, 0.15, 1.0, 0.4);
 
     color = mix(color, noiseColor, noise);
+    color = mix(color, vec4(1.0), 1.5*getLighting());
 
     gl_FragColor = vec4(color);
 }

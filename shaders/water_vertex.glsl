@@ -1,6 +1,7 @@
 uniform float uTime;
 
 varying vec2 worldPosition;
+varying vec3 vNormal;
 
 const float PHI = 1.61803398874989484820459; // golden ratio: (1 + sqrt(5)) / 2
 
@@ -44,18 +45,32 @@ float snoise(vec2 v) {
     return 2.0*(130.0 * dot(m, g) - 1.0);
 }
 
-void main() {
-    const vec2 waterDirection = vec2(0.0, 1.0);
+
+float waterHeight(vec2 position) {
     const float waveFrequency = 0.1;
     const float waveAmplitude = 0.3;
     const float waterSpeed = 0.0002;
 
+    return waveAmplitude * snoise(waveFrequency*position + waterSpeed*uTime*vec2(0.0, 1.0))
+         + 0.5*waveAmplitude * snoise(waveFrequency*position + waterSpeed*uTime*vec2(0.0, -2.0) + vec2(2738.2749, 9572.2048))
+         + 0.4*waveAmplitude * snoise(4.0*waveFrequency*position + waterSpeed*uTime*vec2(0.0, -1.0) + vec2(9284.2442, 2648.1244));
+}
+
+
+void main() {
+    const float delta = 0.01;
+
     worldPosition = (modelMatrix * vec4(position, 1.0)).xz;
 
     vec3 new_position = position;
-    new_position.z += waveAmplitude * snoise(waveFrequency*worldPosition + waterSpeed*uTime*waterDirection)
-                    + 0.5*waveAmplitude * snoise(waveFrequency*worldPosition - 2.0*waterSpeed*uTime*waterDirection + vec2(2738.2749, 9572.2048))
-                    + 0.4*waveAmplitude * snoise(4.0*waveFrequency*worldPosition - 1.0*waterSpeed*uTime*waterDirection + vec2(9284.2442, 2648.1244));
+    new_position.z += waterHeight(worldPosition);
+
+
+    vNormal = vec3(
+        waterHeight(worldPosition + vec2(delta, 0.0)) - waterHeight(worldPosition - vec2(delta, 0.0)),
+        2.0*delta,
+        waterHeight(worldPosition + vec2(0.0, delta)) - waterHeight(worldPosition - vec2(0.0, delta))
+    );
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(new_position, 1.0);
 }

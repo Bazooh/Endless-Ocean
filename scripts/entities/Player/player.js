@@ -190,7 +190,7 @@ export class Player extends Entity {
         this.velocity.add(this.acceleration.clone().multiplyScalar(delta_time));
 
         var targetPosition = this.position.clone().add(this.velocity.clone().multiplyScalar(delta_time));
-        if (targetPosition.y > maxHeight) targetPosition.y = maxHeight;
+        // if (targetPosition.y > maxHeight) targetPosition.y = maxHeight;
 
         //Position
         if (this.checkInWall(targetPosition)) {

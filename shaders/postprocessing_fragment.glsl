@@ -25,7 +25,8 @@ const vec3 scatteringCoefficient = 8.0*pi*pi*pi*n2_1*n2_1 / (3.0 * molecularDens
 const float atmosphereHeight = 10.0;
 const float densityAttenuation = 1.0 / atmosphereHeight;
 
-const float sunIntensity = 1e4;
+const float sunIntensity = 2e4;
+const vec3 sunPosition = vec3(-10000.0, 5000.0, 0.0);
 
 
 vec2 distort(vec2 uv, vec2 amplitude, vec2 frequency, vec2 phase) {
@@ -45,7 +46,7 @@ float density(float altitude) {
         return 0.0;
     }
 
-    return (1.0 - altitude) * exp(-altitude * densityAttenuation);
+    return exp(-altitude * densityAttenuation);
 }
 
 
@@ -101,13 +102,13 @@ bool intersectionRaySphere(vec3 origin, vec3 direction, vec3 center, float radiu
 vec3 intensity(vec3 pos, vec3 dir, vec3 sunPosition) {
     vec3 atomsphereEntryPoint;
     vec3 atomsphereEndPoint;
-    if (!intersectionRaySphere(pos, dir, vec3(0.0, -1000.0, 0.0), 1000.0 + atmosphereHeight, atomsphereEntryPoint, atomsphereEndPoint)) {
+    if (!intersectionRaySphere(pos, dir, vec3(0.0, -100000.0, 0.0), 100050.0 + atmosphereHeight, atomsphereEntryPoint, atomsphereEndPoint)) {
         return vec3(0.0);
     }
 
     vec3 planetEntryPoint;
     vec3 planetEndPoint;
-    if (intersectionRaySphere(pos, dir, vec3(0.0, -1000.0, 0.0), 1000.0, planetEntryPoint, planetEndPoint)) {
+    if (intersectionRaySphere(pos, dir, vec3(0.0, -100000.0, 0.0), 100049.0, planetEntryPoint, planetEndPoint)) {
         atomsphereEndPoint = planetEntryPoint;
     }
 
@@ -132,46 +133,45 @@ vec3 intensity(vec3 pos, vec3 dir, vec3 sunPosition) {
 
 
 vec3 rotateVector(vec3 direction) {
-    // Normalize the vectors
-    direction = normalize(direction);
-    vec3 cameraDirection = normalize(uCameraDirection);
+    vec2 cameraDirection = normalize(uCameraDirection.xz);
+    vec2 axis = normalize(vec2(0.0, abs(cameraDirection.x)));
+    
+    float halfAngle = 0.5*acos(cameraDirection.y)*sign(cameraDirection.x);
+    vec3 quat = vec3(axis * sin(halfAngle), cos(halfAngle));
 
-    // Compute the axis of rotation
-    vec3 axis = cross(direction, cameraDirection);
-    float angle = acos(dot(direction, cameraDirection));
-
-    // Create a quaternion for rotation
-    float halfAngle = angle * 0.5;
-    float s = sin(halfAngle);
-    vec4 quat = vec4(axis * s, cos(halfAngle));
-
-    // Convert quaternion to rotation matrix
-    mat4 rotationMatrix = mat4(
-        1.0 - 2.0 * (quat.y * quat.y + quat.z * quat.z), 2.0 * (quat.x * quat.y - quat.w * quat.z), 2.0 * (quat.x * quat.z + quat.w * quat.y), 0.0,
-        2.0 * (quat.x * quat.y + quat.w * quat.z), 1.0 - 2.0 * (quat.x * quat.x + quat.z * quat.z), 2.0 * (quat.y * quat.z - quat.w * quat.x), 0.0,
-        2.0 * (quat.x * quat.z - quat.w * quat.y), 2.0 * (quat.y * quat.z + quat.w * quat.x), 1.0 - 2.0 * (quat.x * quat.x + quat.y * quat.y), 0.0,
-        0.0, 0.0, 0.0, 1.0
+    mat3 rotationMatrix = mat3(
+        1.0 - 2.0*quat.y*quat.y, 2.0*quat.x*quat.y, 2.0*quat.z*quat.y,
+        2.0*quat.x*quat.y, 1.0 - 2.0*quat.x*quat.x, -2.0*quat.z*quat.x,
+        -2.0*quat.z*quat.y, 2.0*quat.z*quat.x, 1.0 - 2.0*(quat.x*quat.x + quat.y*quat.y)
     );
 
-    // Apply rotation to direction vector
-    vec4 rotatedDirection = rotationMatrix * vec4(direction, 1.0);
-
-    return rotatedDirection.xyz;
+    return rotationMatrix * direction;
+    return vec3(0.0, 0.0, 1.0);
 }
 
 
 // WARNING : This should not work if the camera is looking up or down
 vec3 getLookingDirection() {
-    float dx = vUv.x * uTanHalfFov * uAspectRatio;
-    float dy = vUv.y * uTanHalfFov;
+    float dx = vUv.x * uTanHalfFov * uAspectRatio * 2.0 - 1.0;
+    float dy = vUv.y * uTanHalfFov * 2.0 - 1.0;
 
-    vec3 direction = vec3(dx, dy, 1.0);
+    vec3 direction = normalize(vec3(dx, dy, 1.0));
     return rotateVector(direction);
 }
 
 
 vec3 atmosphereColor(vec3 sunPosition) {
-    return intensity(vec3(0.0, uCameraPosition.y, 0.0), getLookingDirection(), sunPosition);
+    vec3 lookingDirection = getLookingDirection();
+    const vec3 sunColor = vec3(1.0, 0.97, 0.38);
+
+    vec3 sky = intensity(vec3(0.0, uCameraPosition.y, 0.0), lookingDirection, sunPosition);
+
+    float cos_theta = dot(normalize(sunPosition - vec3(0.0, uCameraPosition.y, 0.0)), lookingDirection);
+    if (cos_theta > 0.98) {
+        return mix(sky, sunColor, (cos_theta - 0.98) * (cos_theta - 0.98) * 60.0 * 60.0);
+    }
+
+    return sky;
 }
 
 
@@ -189,7 +189,6 @@ void main() {
     float depth = texture2D(tDepth, uv).r;
 
     if (isAtmoshepere(depth)) {
-        vec3 sunPosition = vec3(0.0, 1000.0, 0.0);
         gl_FragColor = vec4(atmosphereColor(sunPosition), 1.0);
         return;
     }
