@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'control';
 import { updateChunksShaderTime } from './chunk.js';
-import { updateNoiseGUI } from './gui.js';
+import { updateNoiseGUI, updateAtmoshpereGUI } from './gui.js';
 import { GUI } from 'dat.gui';
 import { Player, updatePlayerGUI } from './entities/player/player.js';
 import { updateCameraGUI } from './entities/player/followCamera.js';
@@ -31,7 +31,16 @@ const view = {
     far: 1000
 }
 
-const view_distance = 5; // in chunks
+const atmosphere_param = {
+    uSunIntensity: 200,
+    uWaveLength: {x: 680, y: 550, z: 450},
+    uAtmosphereHeight: 8000,
+    uEarthRadius: 6371,
+    uSunColor: {r: 1, g: 1, b: 1},
+    uScatteringFactor: 3.0,
+}
+
+const view_distance = 10; // in chunks
 
 globalThis.scene = new THREE.Scene();
 
@@ -54,10 +63,23 @@ addShader(
         uCameraPosition: camera.position,
         uCameraDirection: camera.getWorldDirection(new THREE.Vector3()),
         uTanHalfFov: Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)),
-        uAspectRatio: camera.aspect
+        uAspectRatio: camera.aspect,
+        uWaveLength: new THREE.Vector3(atmosphere_param.uWaveLength.x, atmosphere_param.uWaveLength.y, atmosphere_param.uWaveLength.z),
+        uAtmosphereHeight: atmosphere_param.uAtmosphereHeight,
+        uSunIntensity: atmosphere_param.uSunIntensity,
+        uEarthRadius: atmosphere_param.uEarthRadius,
+        uSunColor: new THREE.Vector3(atmosphere_param.uSunColor.r, atmosphere_param.uSunColor.g, atmosphere_param.uSunColor.b),
+        uScatteringFactor: atmosphere_param.uScatteringFactor,
     }
 ).then(([shader, _]) => {
     composer.addPass(new ShaderPass(shader));
+
+    const gui = new GUI();
+    updateNoiseGUI(gui);
+    updatePlayerGUI(gui, player);
+    updateCameraGUI(gui, controls, player);
+    updateLightGUI(gui, player);
+    updateAtmoshpereGUI(gui, atmosphere_param, composer.passes[1]);
 });
 
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -68,12 +90,6 @@ const player = new Player(
     new THREE.Vector3(playerSpawn.direction.x, playerSpawn.direction.y, playerSpawn.direction.z),
     view_distance
 );
-
-const gui = new GUI();
-updateNoiseGUI(gui);
-updatePlayerGUI(gui, player);
-updateCameraGUI(gui, controls, player);
-updateLightGUI(gui, player);
 
 function animate() {
     requestAnimationFrame(animate);
