@@ -14,6 +14,13 @@ const zero = new THREE.Vector3(0, 0, 0);
 const maxHeight = -0.5;
 var modelOffset = new THREE.Vector3(0, -0.5, 0);
 
+const collisionOffsets = [
+    new THREE.Vector3(0.4, 0.6, -1.5), new THREE.Vector3(0.4, -0.15, -1.5), new THREE.Vector3(-0.4, 0.6, -1.5), new THREE.Vector3(-0.4, -0.15, -1.5),
+    new THREE.Vector3(0.5, 0.7, 1.5), new THREE.Vector3(0.5, -0.15, 1.5), new THREE.Vector3(-0.5, 0.7, 1.5), new THREE.Vector3(-0.5, -0.15, 1.5),
+    new THREE.Vector3(0.5, 0.7, 0), new THREE.Vector3(0.5, -0.3, 0), new THREE.Vector3(-0.5, 0.7, 0), new THREE.Vector3(-0.5, -0.3, 0),
+];
+
+
 export const player_param = {
     enableCollisions: true,
     horizontalAcceleration: 20,
@@ -36,7 +43,6 @@ export function updatePlayerGUI(gui, player) {
 
 /*
 TODO
-- Full Collisions
 - Player Material
 */
 
@@ -59,6 +65,7 @@ export class Player extends Entity {
         sca.makeScale(ScaleFact,ScaleFact,ScaleFact);
 
         var material = new THREE.MeshBasicMaterial({color: 0xaaaaff});
+        material.side = THREE.DoubleSide;
         this.mesh = new THREE.Mesh( geometry, material );
 
         this.mesh.applyMatrix4(sca);
@@ -69,12 +76,18 @@ export class Player extends Entity {
 
         this.modelLoaded = true;
 
-        //Test Cylinder
-        // var testMesh = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 2, 16), new THREE.MeshBasicMaterial({color: 0xaaaaff}));
-        // testMesh.rotation.set(Math.PI / 2, 0, 0);
-        // this.model.add(testMesh);
-        // testMesh.material.transparent = true;
-        // testMesh.material.opacity = 0.5;
+        // Test Cubes at collision points
+        // this.collisionObjects = [];
+
+        // for (var i = 0; i < collisionOffsets.length; i++) {
+        //     var newMesh = new THREE.Object3D;
+        //     newMesh.position.set(...collisionOffsets[i]);
+        //     scene.add(newMesh);
+        //     this.collisionObjects[i] = newMesh;
+        //     newMesh.add(new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.25, 0.25), new THREE.MeshBasicMaterial({color: 0xffaaaa})));
+        // }
+        // this.showCollisionPoints = true;
+        
     }
 
 
@@ -162,11 +175,28 @@ export class Player extends Entity {
         updateChunksShaderUniforms({'uLightDir': getLightDirection(this.direction)});
     }
 
+    checkInWall(position, rotation) {
 
-    checkInWall(position) {
-        return player_param.enableCollisions && this.inWall(position);
+        for (var i = 0; i < collisionOffsets.length; i++) {
+
+            //get collision offset
+            var pos = collisionOffsets[i].clone();
+
+            //set rotation
+            pos.applyAxisAngle(up, rotation);
+
+            //set position
+            pos.add(position);
+
+            //update test cube to show point
+            if (this.showCollisionPoints) this.collisionObjects[i].position.set(...pos);
+
+            //check if point is in wall
+            if (this.inWall(pos)) return true;
+        }
+
+        return false;
     }
-
 
     inWall(position) {
         return !canMoveTo(...position);
@@ -179,6 +209,9 @@ export class Player extends Entity {
 
 
     update(delta_time) {
+
+        if (!this.modelLoaded) return false;
+
         //Acceleration based on input
         this.acceleration = this.direction.clone().multiplyScalar(this._getAxis(this.input.forward, this.input.backward) * player_param.horizontalAcceleration);
         this.acceleration.add(up.clone().multiplyScalar(this._getAxis(this.input.up, this.input.down) * player_param.verticalAcceleration));
@@ -192,15 +225,18 @@ export class Player extends Entity {
         var targetPosition = this.position.clone().add(this.velocity.clone().multiplyScalar(delta_time));
         // if (targetPosition.y > maxHeight) targetPosition.y = maxHeight;
 
-        //Position
-        if (this.checkInWall(targetPosition)) {
+        var targetRotation = this._getAxis(this.input.left, this.input.right) * player_param.rotationSpeed * delta_time;
+
+        //Collisions
+        if (this.checkInWall(targetPosition, targetRotation + this.yRotation)) {
             this.velocity.copy(zero);
         }
-        else this.position = targetPosition;
-        
-        //Rotations
-        this.direction = this.direction.applyAxisAngle(up, this._getAxis(this.input.left, this.input.right) * player_param.rotationSpeed * delta_time);
+        else {
+            this.position = targetPosition;
+            this.direction = this.direction.applyAxisAngle(up, targetRotation);
+        }
 
+        
         //Camera
         this.followCamera.update(delta_time);
         

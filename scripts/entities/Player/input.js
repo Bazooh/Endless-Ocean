@@ -6,6 +6,7 @@ export class Input {
     down = false;
     left = false;
     right = false;
+    test = false;
 
     constructor() {
         document.addEventListener("keydown", this.onKeyDown.bind(this));
@@ -40,6 +41,8 @@ export class Input {
             case 16:
                 this.down = isDown;
                 break;
+            case 84:
+                this.test = isDown;
             
         }
     }

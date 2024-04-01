@@ -19,6 +19,7 @@ export class Entity {
 
     set direction(new_direction) {
         this._direction = new_direction;
+
         if (this.model != null)
             this.model.quaternion.copy(new THREE.Quaternion().setFromUnitVectors(forward, this.direction));
     }
@@ -57,6 +58,12 @@ export class Entity {
        
     }
 
+    get yRotation() {
+        var angle = Math.atan2(this.direction.x, this.direction.z);
+        if (angle <0) angle += 2 * Math.PI;
+        return angle;
+    }
+
     update(delta_time) {}
 
     requireUpdate() {
@@ -66,4 +73,5 @@ export class Entity {
 
         this.update(deltaTime);
     }
+
 }
