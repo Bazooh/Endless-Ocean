@@ -7,7 +7,7 @@ var dir = new THREE.Vector3;
 var far = new THREE.Vector3;
 
 const offsetPastWall = 0.2;
-const hidePlayerDistance = 1.5;
+const hidePlayerDistance = 2;
 
 
 

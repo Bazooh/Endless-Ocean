@@ -6,18 +6,19 @@ import { FollowCamera } from './followCamera.js';
 import { canMoveTo, updateChunksShaderUniforms, getChunkLineByWorldPos, getChunkLinePosByWorldPos, createChunksFromTopToBottom, chunk_lines } from '../../chunk.js';
 import { getLightDirection } from '../../light.js';
 import {PLYLoader} from 'PLYLoader';
+import {FBXLoader} from 'FBXLoader';
 
 
 const up = new THREE.Vector3(0, 1, 0);
 const zero = new THREE.Vector3(0, 0, 0);
 
 const maxHeight = -0.5;
-var modelOffset = new THREE.Vector3(0, -0.5, 0);
+var modelOffset = new THREE.Vector3(0, -1, 0);
 
 const collisionOffsets = [
-    new THREE.Vector3(0.4, 0.6, -1.5), new THREE.Vector3(0.4, -0.15, -1.5), new THREE.Vector3(-0.4, 0.6, -1.5), new THREE.Vector3(-0.4, -0.15, -1.5),
-    new THREE.Vector3(0.5, 0.7, 1.5), new THREE.Vector3(0.5, -0.15, 1.5), new THREE.Vector3(-0.5, 0.7, 1.5), new THREE.Vector3(-0.5, -0.15, 1.5),
-    new THREE.Vector3(0.5, 0.7, 0), new THREE.Vector3(0.5, -0.3, 0), new THREE.Vector3(-0.5, 0.7, 0), new THREE.Vector3(-0.5, -0.3, 0),
+    new THREE.Vector3(0.4, 0.6, -1.5), new THREE.Vector3(0.4, -0.25, -1.5), new THREE.Vector3(-0.4, 0.6, -1.5), new THREE.Vector3(-0.4, -0.25, -1.5),
+    new THREE.Vector3(0.5, 0.7, 1.5), new THREE.Vector3(0.5, -0.25, 1.5), new THREE.Vector3(-0.5, 0.7, 1.5), new THREE.Vector3(-0.5, -0.25, 1.5),
+    new THREE.Vector3(1, 0.6, 0), new THREE.Vector3(1, -0.3, 0), new THREE.Vector3(-1, 0.7, 0), new THREE.Vector3(-1, -0.3, 0),
 ];
 
 
@@ -52,29 +53,43 @@ export class Player extends Entity {
         super(starting_position, starting_direction, {view_distance: view_distance});
     }
 
-    onModelLoaded(geometry) {
+    onModelLoaded(object) {
 
-        geometry.computeVertexNormals();
-        geometry.computeBoundingBox();
+        const texture = new THREE.TextureLoader().load('./../../models/submarine-low-poly/textures/Submarine__BaseColor.png'); 
+        const normal = new THREE.TextureLoader().load('./../../models/submarine-low-poly/textures/Submarine__Normal.png'); 
+        const metallic = new THREE.TextureLoader().load('./../../models/submarine-low-poly/textures/Submarine__Metallic.png'); 
+        const roughness = new THREE.TextureLoader().load('./../../models/submarine-low-poly/textures/Submarine__Roughness.png'); 
+        const ao = new THREE.TextureLoader().load('./../../models/submarine-low-poly/textures/Submarine__AO.png'); 
 
-        var size = new THREE.Vector3();
-        geometry.boundingBox.getSize(size);
+        const material = new THREE.MeshStandardMaterial( { map:texture, normalMap: normal, aoMap: ao, roughnessMap: roughness } );
 
-        var sca = new THREE.Matrix4();
-        var ScaleFact=5/size.length();
-        sca.makeScale(ScaleFact,ScaleFact,ScaleFact);
+        object.rotation.y = Math.PI;
+        object.position.add(modelOffset);
+        
+        object.traverse( function ( child ) {
 
-        var material = new THREE.MeshBasicMaterial({color: 0xaaaaff});
-        material.side = THREE.DoubleSide;
-        this.mesh = new THREE.Mesh( geometry, material );
+            if ( child.isMesh ) {
+                child.material =  material;
+            }
 
-        this.mesh.applyMatrix4(sca);
-        this.mesh.position.add(modelOffset);
-        this.mesh.rotation.set(Math.PI, 0, 0);
+        } );
 
-        this.model.add(this.mesh);
+        this.object = object;
+
+        this.model.add(object);
 
         this.modelLoaded = true;
+
+        //Test light
+        var light = new THREE.AmbientLight( 0xffffff );
+        light.position.set( 0, 1, 0 ).normalize();
+        scene.add(light);
+
+        //Animations
+        this.mixer = new THREE.AnimationMixer( object );
+
+        const action = this.mixer.clipAction( object.animations[ 0 ] );
+        action.play();
 
         // Test Cubes at collision points
         // this.collisionObjects = [];
@@ -86,26 +101,35 @@ export class Player extends Entity {
         //     this.collisionObjects[i] = newMesh;
         //     newMesh.add(new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.25, 0.25), new THREE.MeshBasicMaterial({color: 0xffaaaa})));
         // }
+
         // this.showCollisionPoints = true;
+
+        // var center = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({color: 0xffaaaa}));
+        // this.model.add(center);
+
         
     }
 
 
     loadModel() {
-        var loader = new PLYLoader();
+        // var loader = new PLYLoader();
+        // loader.load('../../../models/Cartoon Submarine.ply', (geometry) => this.onModelLoaded(geometry));
 
         this.model = new THREE.Object3D();
-        loader.load('../../../models/Cartoon Submarine.ply', (geometry) => this.onModelLoaded(geometry));
+        const fbxLoader = new FBXLoader()
+        fbxLoader.load('./../../models/submarine-low-poly/source/Submarine Low-poly.fbx', 
+        (object) => this.onModelLoaded(object),
+        (xhr) => {console.log((xhr.loaded / xhr.total) * 100 + '% loaded')},
+        (error) => {console.log(error)});
 
         this.input = new Input();
-
-        this.followCamera = new FollowCamera(camera, this);
+         this.followCamera = new FollowCamera(camera, this);
     }
 
     setTransparent(transparent) {
         if (!this.modelLoaded) return;
 
-        this.mesh.visible = !transparent;
+        this.object.visible = !transparent;
 
     }
 
