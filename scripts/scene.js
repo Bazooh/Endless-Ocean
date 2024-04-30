@@ -32,15 +32,15 @@ const view = {
 }
 
 const atmosphere_param = {
-    uSunIntensity: 200,
-    uWaveLength: {x: 680, y: 550, z: 450},
-    uAtmosphereHeight: 8000,
-    uEarthRadius: 6371,
+    uSunIntensity: 1.0,
+    uScatteringCoefficients: {r: 5.19673, g: 12.1427, b: 29.6453},
+    uAtmosphereHeight: 1.0,
+    uEarthRadius: 6.371,
     uSunColor: {r: 1, g: 1, b: 1},
-    uScatteringFactor: 3.0,
+    uRayNumberOfPoints: 40,
 }
 
-const view_distance = 10; // in chunks
+const view_distance = 12; // in chunks
 
 globalThis.scene = new THREE.Scene();
 
@@ -58,18 +58,19 @@ addShader(
     {},
     {
         tDiffuse: null,
+
         tDepth: null,
         uTime: performance.now(),
         uCameraPosition: camera.position,
-        uCameraDirection: camera.getWorldDirection(new THREE.Vector3()),
-        uTanHalfFov: Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)),
-        uAspectRatio: camera.aspect,
-        uWaveLength: new THREE.Vector3(atmosphere_param.uWaveLength.x, atmosphere_param.uWaveLength.y, atmosphere_param.uWaveLength.z),
+        projectionMatrixInverse: camera.projectionMatrixInverse,
+        viewMatrixInverse: camera.matrixWorld,
+
+        uScatteringCoefficients: new THREE.Vector3(atmosphere_param.uScatteringCoefficients.r, atmosphere_param.uScatteringCoefficients.g, atmosphere_param.uScatteringCoefficients.b),
         uAtmosphereHeight: atmosphere_param.uAtmosphereHeight,
         uSunIntensity: atmosphere_param.uSunIntensity,
         uEarthRadius: atmosphere_param.uEarthRadius,
         uSunColor: new THREE.Vector3(atmosphere_param.uSunColor.r, atmosphere_param.uSunColor.g, atmosphere_param.uSunColor.b),
-        uScatteringFactor: atmosphere_param.uScatteringFactor,
+        uRayNumberOfPoints: atmosphere_param.uRayNumberOfPoints,
     }
 ).then(([shader, _]) => {
     composer.addPass(new ShaderPass(shader));
@@ -98,12 +99,11 @@ function animate() {
     
     // update post-processing shader
     if (composer.passes[1] !== undefined) {
-        composer.passes[1].uniforms.uTime.value = performance.now();
         composer.passes[1].uniforms.tDepth.value = composer.renderTarget2.texture;
+        composer.passes[1].uniforms.uTime.value = performance.now();
         composer.passes[1].uniforms.uCameraPosition.value = camera.position;
-        composer.passes[1].uniforms.uCameraDirection.value = camera.getWorldDirection(new THREE.Vector3());
-        composer.passes[1].uniforms.uTanHalfFov.value = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-        composer.passes[1].uniforms.uAspectRatio.value = camera.aspect;
+        composer.passes[1].uniforms.projectionMatrixInverse.value = camera.projectionMatrixInverse;
+        composer.passes[1].uniforms.viewMatrixInverse.value = camera.matrixWorld;
     }
 
     updateChunksShaderTime();

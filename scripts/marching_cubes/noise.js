@@ -3,15 +3,15 @@ import Mash from 'https://cdn.skypack.dev/alea';
 
 
 export const noise_param = {
-    frequency: 0.6,
-    n_octaves: 2,
-    persistence: 0.2,
-    lacunarity: 2,
-    threshold: 0,
-    surface_transition_height: 3, // in chunks (can be float)
+    frequency: 0.2,
+    n_octaves: 3,
+    persistence: 0.15,
+    lacunarity: 4,
+    threshold: 0.2,
+    surface_transition_height: 5, // in chunks (can be float)
     floor_transition_height: 1, // in chunks (can be float)
     surface_level: 0,
-    floor_level: -4
+    floor_level: -8
 };
 
 
