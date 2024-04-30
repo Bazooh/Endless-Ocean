@@ -5,7 +5,6 @@ import {Input} from './input.js';
 import { FollowCamera } from './followCamera.js';
 import { canMoveTo, updateChunksShaderUniforms, getChunkLineByWorldPos, getChunkLinePosByWorldPos, createChunksFromTopToBottom, chunk_lines } from '../../chunk.js';
 import { getLightDirection } from '../../light.js';
-import {PLYLoader} from 'PLYLoader';
 import {FBXLoader} from 'FBXLoader';
 
 

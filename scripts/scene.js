@@ -7,6 +7,7 @@ import { Player, updatePlayerGUI } from './entities/player/player.js';
 import { updateCameraGUI } from './entities/player/followCamera.js';
 import { updateLightGUI } from './light.js';
 import { updateEntities } from './entities/entity.js';
+import {Run} from './fish/fishManager.js';
 import { addShader } from './shader.js';
 import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three/examples/jsm/postprocessing/RenderPass.js';
@@ -123,3 +124,5 @@ function ResizeWindow() {
 
 
 window.addEventListener( 'resize', ResizeWindow);
+
+Run();
