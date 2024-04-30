@@ -8,7 +8,7 @@ const N_VERTICES_MAX = 10_000;
 const noise = createNoise();
 
 
-export function getNormalChunkCoords(x, y, z, noise) {
+export function getNormalChunkCoords(x, y, z) {
     // The normal is the gradient of the noise function
     const nx = (noise(x - epsilon, y, z) - noise(x + epsilon, y, z)) / (2 * epsilon);
     const ny = (noise(x, y - epsilon, z) - noise(x, y + epsilon, z)) / (2 * epsilon);
@@ -145,7 +145,7 @@ function createGeometry(chunk_idx, n_vertices, chunk_size, threshold) {
         const vy = vertices[i + 1] / chunk_size.y;
         const vz = vertices[i + 2] / chunk_size.z;
 
-        normals.push(...getNormalChunkCoords(vx, vy, vz, noise));
+        normals.push(...getNormalChunkCoords(vx, vy, vz));
     }
 
     return {

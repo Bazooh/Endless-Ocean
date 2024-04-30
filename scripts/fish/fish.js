@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import {MTLLoader} from '../../build/loaders/MTLLoader.js';
-import {OBJLoader} from '../../build/loaders/OBJLoader.js';
-import {GetAllFish, GetChunkKeyAtPosition, GetFishInNearbyChunks, EnterChunk} from './fishSpawner.js';
-import {noise_param} from '../marching_cubes/noise.js'
-import { chunk_size } from '../chunk.js';
+import { MTLLoader } from '../../build/loaders/MTLLoader.js';
+import { OBJLoader } from '../../build/loaders/OBJLoader.js';
+import { GetAllFish, GetChunkKeyAtPosition, GetFishInNearbyChunks, EnterChunk } from './fishSpawner.js';
+import { noise_param } from '../marching_cubes/noise.js'
+import { chunk_size, getNormal, noise } from '../chunk.js';
 
 const maxDistance = 30;
 
@@ -14,6 +14,9 @@ const baseCohesionMultiplier = 0.25;
 const maxSteering = 0.5;
 
 const maxYMovement = 0.2;
+
+const avoidTerrainCoefficient = 0.2; // The higher the value, the more the fish will avoid terrain
+const avoidTerrainThreshold = 0.9; // Value between 0 and 1 indicating how dense (equivalent to close to a wall) the terrain must be to avoid it
 
 
 export class BoidData {
@@ -156,17 +159,25 @@ export class Fish {
         steer.y = Math.min(steer.y, maxYMovement);
         steer.y = Math.max(steer.y, -maxYMovement);
 
-        var x = newPos.x - this.centre.x;
-        var z = newPos.z - this.centre.z;
+        const x = newPos.x - this.centre.x;
+        const z = newPos.z - this.centre.z;
         
         if (Math.sqrt(x*x + z*z) >= maxDistance) {
             steer.sub(newPos.clone().sub(this.centre));
         }
 
-
         if (newPos.y > noise_param.surface_level * chunk_size.y - 1) {
             newPos.y = noise_param.surface_level * chunk_size.y - 1;
             steer.y -= 1;
+        }
+
+        const terrain_gradient = getNormal(...newPos);
+        const gradient_length = terrain_gradient.length();
+        if (gradient_length > 0.0001) {
+            terrain_gradient.divideScalar(gradient_length);
+            const density = ((noise(...newPos) + 1) / (noise_param.threshold + 1)) ** 2;
+            if (density > avoidTerrainThreshold)
+                steer.add(terrain_gradient.multiplyScalar(density * avoidTerrainCoefficient));
         }
 
         steer.normalize();
@@ -184,8 +195,6 @@ export class Fish {
             EnterChunk(this, this.currentChunk, newChunk);
             this.currentChunk = newChunk;
         }
-        
-
     }
 
     findNeighbours(allNeighbours, sameFishNeighbours) {

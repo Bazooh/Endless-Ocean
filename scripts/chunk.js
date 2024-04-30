@@ -22,8 +22,8 @@ export function unloadAllChunks() {
 }
 
 
-export function getNormal(x, y, z, noise) {
-    return new THREE.Vector3(...getNormalChunkCoords(x / chunk_size.x, y / chunk_size.y, z / chunk_size.z, noise));
+export function getNormal(x, y, z) {
+    return new THREE.Vector3(...getNormalChunkCoords(x / chunk_size.x, y / chunk_size.y, z / chunk_size.z));
 }
 
 
