@@ -164,6 +164,9 @@ vec3 atmosphereColor(vec3 sunPosition) {
     if ((uCameraPosition.y > 0.0 && lookingDirection.y < 0.0) || (uCameraPosition.y < 0.0 && lookingDirection.y > 0.0)) {
         const vec3 horizonColor = vec3(0.07, 0.07, 0.38);
         return horizonColor;
+    } else if (uCameraPosition.y < 0.0) {
+        const vec3 spaceColor = vec3(0.0, 0.0, 0.0);
+        return spaceColor;
     }
 
     const vec3 sunColor = vec3(1.0, 0.97, 0.38);
