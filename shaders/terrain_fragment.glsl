@@ -18,7 +18,7 @@ vec3 apply_lighting(vec3 color) {
     float angle = acos(dot(normalize(pos), uLightDir));
 
     if (angle > uLightAngle) {
-        return vec3(0.0);
+        return vec3(0.001);
     }
 
     vec3 lightDir = normalize(uLightPos - worldPosition);
