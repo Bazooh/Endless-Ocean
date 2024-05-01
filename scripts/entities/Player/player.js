@@ -41,11 +41,6 @@ export function updatePlayerGUI(gui, player) {
 }
 
 
-/*
-TODO
-- Player Material
-*/
-
 export class Player extends Entity {
 
     constructor(starting_position, starting_direction, view_distance) {

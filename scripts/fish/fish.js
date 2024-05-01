@@ -4,6 +4,7 @@ import { OBJLoader } from '../../build/loaders/OBJLoader.js';
 import { GetAllFish, GetChunkKeyAtPosition, GetFishInNearbyChunks, EnterChunk } from './fishSpawner.js';
 import { noise_param } from '../marching_cubes/noise.js'
 import { chunk_size, getNormal, noise } from '../chunk.js';
+import { player } from '../scene.js';
 
 const maxDistance = 30;
 
@@ -17,6 +18,11 @@ const maxYMovement = 0.2;
 
 const avoidTerrainCoefficient = 0.2; // The higher the value, the more the fish will avoid terrain
 const avoidTerrainThreshold = 0.9; // Value between 0 and 1 indicating how dense (equivalent to close to a wall) the terrain must be to avoid it
+
+
+const distancePlayerAvoiding = 5;
+const avoidingPlayerCoefficient = 2.0;
+const avoidingPlayerSpeed = 3.0;
 
 
 export class BoidData {
@@ -180,6 +186,12 @@ export class Fish {
                 steer.add(terrain_gradient.multiplyScalar(density * avoidTerrainCoefficient));
         }
 
+        let avoidingPlayer = false
+        if (player.position.distanceTo(newPos) < distancePlayerAvoiding) {
+            steer.add(newPos.clone().sub(player.position).normalize().multiplyScalar(avoidingPlayerCoefficient));
+            avoidingPlayer = true;
+        }
+
         steer.normalize();
 
         let newDirection = this.direction.clone();
@@ -188,6 +200,8 @@ export class Fish {
         this.direction = newDirection;
 
         this.position = newPos;
+        if (avoidingPlayer)
+            this.direction.multiplyScalar(avoidingPlayerSpeed);
 
 
         let newChunk = GetChunkKeyAtPosition(this.position.x, this.position.z);

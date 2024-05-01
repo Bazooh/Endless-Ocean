@@ -87,7 +87,7 @@ addShader(
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.update();
 
-const player = new Player(
+export const player = new Player(
     new THREE.Vector3(playerSpawn.position.x, playerSpawn.position.y, playerSpawn.position.z),
     new THREE.Vector3(playerSpawn.direction.x, playerSpawn.direction.y, playerSpawn.direction.z),
     view_distance
