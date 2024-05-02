@@ -181,9 +181,15 @@ export class Fish {
         const gradient_length = terrain_gradient.length();
         if (gradient_length > 0.0001) {
             terrain_gradient.divideScalar(gradient_length);
-            const density = ((noise(...newPos) + 1) / (noise_param.threshold + 1)) ** 2;
-            if (density > avoidTerrainThreshold)
-                steer.add(terrain_gradient.multiplyScalar(density * avoidTerrainCoefficient));
+
+            let current_noise = noise(newPos.x / chunk_size.x, newPos.y / chunk_size.y, newPos.z / chunk_size.z);
+            if (current_noise > noise_param.threshold)
+                current_noise = noise_param.threshold - 0.0001;
+            if (current_noise + 1 < avoidTerrainThreshold * (noise_param.threshold + 1))
+                current_noise = -1;
+
+            const density = (1 + current_noise) / (noise_param.threshold - current_noise);
+            steer.add(terrain_gradient.multiplyScalar(density * avoidTerrainCoefficient));
         }
 
         let avoidingPlayer = false
