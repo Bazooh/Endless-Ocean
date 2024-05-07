@@ -71,7 +71,7 @@ export class Entity {
         const deltaTime = (current_time - this.prev_time) / 1000;
         this.prev_time = current_time;
 
-        this.update(deltaTime);
+        if (deltaTime < 3) this.update(deltaTime);
     }
 
 }

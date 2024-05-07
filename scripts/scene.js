@@ -51,6 +51,12 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+export const player = new Player(
+    new THREE.Vector3(playerSpawn.position.x, playerSpawn.position.y, playerSpawn.position.z),
+    new THREE.Vector3(playerSpawn.direction.x, playerSpawn.direction.y, playerSpawn.direction.z),
+    view_distance
+);
+
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 
@@ -86,12 +92,6 @@ addShader(
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.update();
-
-export const player = new Player(
-    new THREE.Vector3(playerSpawn.position.x, playerSpawn.position.y, playerSpawn.position.z),
-    new THREE.Vector3(playerSpawn.direction.x, playerSpawn.direction.y, playerSpawn.direction.z),
-    view_distance
-);
 
 function animate() {
     requestAnimationFrame(animate);
