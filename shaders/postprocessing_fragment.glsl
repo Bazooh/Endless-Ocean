@@ -32,10 +32,6 @@ bool isAtmoshepere(float depth) {
 }
 
 
-// float cloudDensity(vec3 point) {
-//     return texture(cloudTexture, fract(point / 2.0)).r * 2.0;
-// }
-
 
 float density(vec3 point) {
     float altitude = length(point) - uEarthRadius;
@@ -158,15 +154,14 @@ vec3 getLookingDirection() {
 }
 
 
-vec3 atmosphereColor(vec3 sunPosition) {
+vec3 atmosphereColor(vec3 sunPosition, vec3 horizonColor) {
     vec3 lookingDirection = getLookingDirection();
 
     if ((uCameraPosition.y > 0.0 && lookingDirection.y < 0.0) || (uCameraPosition.y < 0.0 && lookingDirection.y > 0.0)) {
-        const vec3 horizonColor = vec3(0.07, 0.07, 0.38);
         return horizonColor;
     } else if (uCameraPosition.y < 0.0) {
-        const vec3 spaceColor = vec3(0.0, 0.0, 0.0);
-        return spaceColor;
+        const vec3 spaceColor = vec3(0.0);
+        return horizonColor;
     }
 
     const vec3 sunColor = vec3(1.0, 0.97, 0.38);
@@ -198,14 +193,26 @@ void main() {
 
     float depth = texture2D(tDepth, uv).r;
 
+    float dt = fract(uTime / 10000.0) - 0.5;
+    float sunDistance = 149e3;
+    float angle = 2.0 * pi * dt;
+    vec3 sunPosition = vec3(sunDistance * cos(angle), sunDistance * sin(angle), 0.0);
+
+    const vec3 farOceanColor = vec3(0.07, 0.07, 0.38);
+
+    float sunIntensity = sunPosition.y / sunDistance;
+    if (sunIntensity < 0.0)
+        sunIntensity = 0.0;
+    vec3 horizonColor = mix(vec3(0.0), farOceanColor, sunIntensity);
+
     if (isAtmoshepere(depth)) {
-        float dt = fract(uTime / 10000.0) - 0.5;
-        float sunDistance = 149e3;
-        float angle = 2.0 * pi * dt;
-        vec3 sunPosition = vec3(sunDistance * cos(angle), sunDistance * sin(angle), 0.0);
-        gl_FragColor = vec4(atmosphereColor(sunPosition), 1.0);
+        gl_FragColor = vec4(atmosphereColor(sunPosition, horizonColor), 1.0);
         return;
     }
+    
+    float blur = (1.0 - depth) * (1.0 - sunIntensity);
+
+    color = mix(color, horizonColor, blur);
 
     gl_FragColor = vec4(color, 1.0);
 }
