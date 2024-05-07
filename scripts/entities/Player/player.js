@@ -78,32 +78,11 @@ export class Player extends Entity {
         var light = new THREE.AmbientLight( 0xffffff );
         light.position.set( 0, 1, 0 ).normalize();
         scene.add(light);
-
-    
-
-        // Test Cubes at collision points
-        // this.collisionObjects = [];
-
-        // for (var i = 0; i < collisionOffsets.length; i++) {
-        //     var newMesh = new THREE.Object3D;
-        //     newMesh.position.set(...collisionOffsets[i]);
-        //     scene.add(newMesh);
-        //     this.collisionObjects[i] = newMesh;
-        //     newMesh.add(new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.25, 0.25), new THREE.MeshBasicMaterial({color: 0xffaaaa})));
-        // }
-
-        // this.showCollisionPoints = true;
-
-        // var center = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({color: 0xffaaaa}));
-        // this.model.add(center);
-
         
     }
 
 
     loadModel() {
-        // var loader = new PLYLoader();
-        // loader.load('../../../models/Cartoon Submarine.ply', (geometry) => this.onModelLoaded(geometry));
 
         this.model = new THREE.Object3D();
         const fbxLoader = new FBXLoader()
@@ -237,7 +216,7 @@ export class Player extends Entity {
         this.velocity.add(this.acceleration.clone().multiplyScalar(delta_time));
 
         var targetPosition = this.position.clone().add(this.velocity.clone().multiplyScalar(delta_time));
-        // if (targetPosition.y > maxHeight) targetPosition.y = maxHeight;
+        if (targetPosition.y > maxHeight) targetPosition.y = maxHeight;
 
         var targetRotation = this._getAxis(this.input.left, this.input.right) * player_param.rotationSpeed * delta_time;
 
@@ -249,7 +228,6 @@ export class Player extends Entity {
             this.position = targetPosition;
             this.direction = this.direction.applyAxisAngle(up, targetRotation);
         }
-
         
         //Camera
         this.followCamera.update(delta_time);

@@ -107,7 +107,8 @@ function getSpawnY(spawn_x, spawn_z) {
         let isWater = noise_value < noise_param.threshold
 
         let dist = Math.abs(noise_value - noise_param.threshold)
-        if (dist < 0.0001 || lower == upper) break
+        if (dist < 0.0001) return mid;
+        if (Math.abs(lower - upper) < 0.0001) return lower;
 
         if (isWater) {
             upper = mid
@@ -118,5 +119,5 @@ function getSpawnY(spawn_x, spawn_z) {
 
     }
 
-    return mid;
+    
 }
