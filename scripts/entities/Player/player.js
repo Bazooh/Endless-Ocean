@@ -79,11 +79,7 @@ export class Player extends Entity {
         light.position.set( 0, 1, 0 ).normalize();
         scene.add(light);
 
-        //Animations
-        this.mixer = new THREE.AnimationMixer( object );
-
-        const action = this.mixer.clipAction( object.animations[ 0 ] );
-        action.play();
+    
 
         // Test Cubes at collision points
         // this.collisionObjects = [];

@@ -8,6 +8,8 @@ import { player } from '../scene.js';
 
 const maxDistance = 30;
 
+const boundsSize = 100;
+
 const baseSeparationMultiplier = 1.5;
 const baseAlignmentMultiplier = 1;
 const baseCohesionMultiplier = 0.25;
@@ -164,13 +166,7 @@ export class Fish {
 
         steer.y = Math.min(steer.y, maxYMovement);
         steer.y = Math.max(steer.y, -maxYMovement);
-
-        const x = newPos.x - this.centre.x;
-        const z = newPos.z - this.centre.z;
-        
-        if (Math.sqrt(x*x + z*z) >= maxDistance) {
-            steer.sub(newPos.clone().sub(this.centre));
-        }
+        if (this.isBoss) console.log(steer.y);
 
         if (newPos.y > noise_param.surface_level * chunk_size.y - 1) {
             newPos.y = noise_param.surface_level * chunk_size.y - 1;
@@ -205,7 +201,28 @@ export class Fish {
         newDirection.normalize();
         this.direction = newDirection;
 
+        //teleporting near player
+        const minPos = new THREE.Vector2(player.position.x - boundsSize, player.position.z - boundsSize)
+        const maxPos = new THREE.Vector2(player.position.x + boundsSize, player.position.z + boundsSize)
+       
+        if (newPos.x < minPos.x) {
+            newPos.x = maxPos.x;
+        }
+        else if (newPos.x > maxPos.x) {
+            newPos.x = minPos.x;
+        }
+
+        if (newPos.z < minPos.y) {
+            newPos.z = maxPos.y;
+        }
+        else if (newPos.z > maxPos.y) {
+            newPos.z = minPos.y;
+        }
+
+        
+
         this.position = newPos;
+
         if (avoidingPlayer)
             this.direction.multiplyScalar(avoidingPlayerSpeed);
 
