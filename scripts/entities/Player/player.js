@@ -109,7 +109,7 @@ export class Player extends Entity {
         const fbxLoader = new FBXLoader()
         fbxLoader.load('./../../models/submarine-low-poly/source/Submarine Low-poly.fbx', 
         (object) => this.onModelLoaded(object),
-        (xhr) => {console.log((xhr.loaded / xhr.total) * 100 + '% loaded')},
+        (xhr) => {},
         (error) => {console.log(error)});
 
         this.input = new Input();

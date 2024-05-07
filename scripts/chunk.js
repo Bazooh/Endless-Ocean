@@ -5,6 +5,7 @@ import { addShader } from './shader.js';
 import { createWaterGeometry } from './water.js';
 import { Vector3 } from '../build/three.module.js';
 import { getLightUniforms } from './light.js';
+import { spawnCoral } from './environment/coral.js';
 
 
 export const chunk_size = new THREE.Vector3(10, 10, 10);
@@ -67,6 +68,10 @@ export function canMoveTo(x, y, z) {
     return noise(x / chunk_size.x, y / chunk_size.y, z / chunk_size.z) < noise_param.threshold;
 }
 
+export function noiseValue(x, y, z) {
+    return noise(x / chunk_size.x, y / chunk_size.y, z / chunk_size.z)
+}
+
 
 export function updateChunksShaderUniforms(uniforms) {
     Object.values(chunk_lines).forEach((chunkLine) => {
@@ -119,7 +124,7 @@ class chunk {
 
 
     load() {
-        if (this.isLoaded()) {
+        if (this.is_loaded) {
             return;
         }
 
@@ -141,6 +146,8 @@ class chunk {
                 scene.add(this.mesh);
             });
         });
+
+        this.is_loaded = true
     }
 
 
@@ -212,6 +219,8 @@ class verticalChunkLine {
         scene.add(this.water);
 
         chunk_lines[this.id] = this;
+
+        this.all_coral = spawnCoral(this.x, this.z)
     }
 
 
@@ -223,6 +232,10 @@ class verticalChunkLine {
         this.water.geometry.dispose();
         this.water.material.dispose();
         scene.remove(this.water);
+
+        this.all_coral.forEach((coral) => {
+            scene.remove(coral)
+        })
 
         delete chunk_lines[this.id];
     }

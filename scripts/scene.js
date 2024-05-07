@@ -41,7 +41,7 @@ const atmosphere_param = {
     uRayNumberOfPoints: 40,
 }
 
-const view_distance = 12; // in chunks
+const view_distance = 7; // in chunks
 
 globalThis.scene = new THREE.Scene();
 

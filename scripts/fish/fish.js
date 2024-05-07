@@ -8,7 +8,7 @@ import { player } from '../scene.js';
 
 const maxDistance = 30;
 
-const boundsSize = 100;
+const boundsSize = 50;
 
 const baseSeparationMultiplier = 1.5;
 const baseAlignmentMultiplier = 1;
@@ -166,7 +166,6 @@ export class Fish {
 
         steer.y = Math.min(steer.y, maxYMovement);
         steer.y = Math.max(steer.y, -maxYMovement);
-        if (this.isBoss) console.log(steer.y);
 
         if (newPos.y > noise_param.surface_level * chunk_size.y - 1) {
             newPos.y = noise_param.surface_level * chunk_size.y - 1;
