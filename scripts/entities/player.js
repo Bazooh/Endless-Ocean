@@ -1,10 +1,10 @@
 import * as THREE from 'three';
-import { camera } from '../../scene.js';
-import { Entity } from '../entity.js';
+import { camera } from '../scene.js';
+import { Entity } from './entity.js';
 import {Input} from './input.js';
 import { FollowCamera } from './followCamera.js';
-import { canMoveTo, updateChunksShaderUniforms, getChunkLineByWorldPos, getChunkLinePosByWorldPos, createChunksFromTopToBottom, chunk_lines } from '../../chunk.js';
-import { getLightDirection } from '../../light.js';
+import { canMoveTo, updateChunksShaderUniforms, getChunkLineByWorldPos, getChunkLinePosByWorldPos, createChunksFromTopToBottom, chunk_lines } from '../chunk.js';
+import { getLightDirection } from '../light.js';
 import {FBXLoader} from 'FBXLoader';
 
 
