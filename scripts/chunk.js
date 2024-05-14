@@ -9,7 +9,7 @@ import { spawnCoral } from './environment/coral.js';
 
 
 export const chunk_size = new THREE.Vector3(10, 10, 10);
-export const n_vertices = new THREE.Vector3(8, 8, 8);
+export const n_vertices = new THREE.Vector3(16, 16, 16);
 
 export const chunk_lines = {};
 
