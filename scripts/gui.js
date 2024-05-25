@@ -15,7 +15,7 @@ export function updateNoiseGUI(gui) {
 
 export function updateAtmoshpereGUI(gui, atmosphere_param, shader) {
     const folder = gui.addFolder('Atmosphere');
-    folder.add(atmosphere_param, 'uSunIntensity', 0, 1000000, 0.01).onChange((value) => shader.uniforms.uSunIntensity.value = value);
+    folder.add(atmosphere_param, 'uSunIntensity', 0, 2, 0.01).onChange((value) => shader.uniforms.uSunIntensity.value = value);
     
     const scatteringCoefficients = folder.addFolder('Scattering Coefficients');
     scatteringCoefficients.add(atmosphere_param.uScatteringCoefficients, 'r', 0, 50, 0.001).onChange((value) => shader.uniforms.uScatteringCoefficients.value = new THREE.Vector3(value, shader.uniforms.uScatteringCoefficients.value.y, shader.uniforms.uScatteringCoefficients.value.z));
@@ -30,7 +30,12 @@ export function updateAtmoshpereGUI(gui, atmosphere_param, shader) {
     sunColorFolder.add(atmosphere_param.uSunColor, 'g', 0, 1, 0.01).onChange((value) => shader.uniforms.uSunColor.value = new THREE.Vector3(shader.uniforms.uSunColor.value.x, value, shader.uniforms.uSunColor.value.z));
     sunColorFolder.add(atmosphere_param.uSunColor, 'b', 0, 1, 0.01).onChange((value) => shader.uniforms.uSunColor.value = new THREE.Vector3(shader.uniforms.uSunColor.value.x, shader.uniforms.uSunColor.value.y, value));
 
+    folder.add(atmosphere_param, 'uSunTimePeriod', 1, 1e3, 1).onChange((value) => shader.uniforms.uSunTimePeriod.value = value * 1000);
+
     folder.add(atmosphere_param, 'uRayNumberOfPoints', 1, 100, 1).onChange((value) => shader.uniforms.uRayNumberOfPoints.value = value);
+
+    const resetTimeButton = folder.add({ resetTime: () => { shader.uniforms.uTime.value = -0.15*shader.uniforms.uSunTimePeriod.value; } }, 'resetTime');
+    resetTimeButton.name("Reset Time");
 }
 
 

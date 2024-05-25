@@ -10,6 +10,7 @@ uniform vec3 uSunColor;
 uniform float uEarthRadius;
 uniform int uRayNumberOfPoints;
 uniform float uCloudsHeight;
+uniform float uSunTimePeriod;
 
 uniform mat4 projectionMatrixInverse;
 uniform mat4 viewMatrixInverse;
@@ -193,7 +194,7 @@ void main() {
 
     float depth = texture2D(tDepth, uv).r;
 
-    float dt = fract(uTime / 10000.0) - 0.5;
+    float dt = fract(uTime / uSunTimePeriod);
     float sunDistance = 149e3;
     float angle = 2.0 * pi * dt;
     vec3 sunPosition = vec3(sunDistance * cos(angle), sunDistance * sin(angle), 0.0);

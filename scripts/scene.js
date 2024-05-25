@@ -40,6 +40,7 @@ const atmosphere_param = {
     uEarthRadius: 6.371,
     uSunColor: {r: 1, g: 1, b: 1},
     uRayNumberOfPoints: 40,
+    uSunTimePeriod: 10,
 }
 
 const view_distance = 7; // in chunks
@@ -78,6 +79,7 @@ addShader(
         uSunIntensity: atmosphere_param.uSunIntensity,
         uEarthRadius: atmosphere_param.uEarthRadius,
         uSunColor: new THREE.Vector3(atmosphere_param.uSunColor.r, atmosphere_param.uSunColor.g, atmosphere_param.uSunColor.b),
+        uSunTimePeriod: atmosphere_param.uSunTimePeriod * 1000,
         uRayNumberOfPoints: atmosphere_param.uRayNumberOfPoints,
     }
 ).then(([shader, _]) => {
@@ -95,6 +97,7 @@ addShader(
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.update();
 
+let prev_time = performance.now();
 function animate() {
     requestAnimationFrame(animate);
 
@@ -103,11 +106,12 @@ function animate() {
     // update post-processing shader
     if (composer.passes[1] !== undefined) {
         composer.passes[1].uniforms.tDepth.value = composer.renderTarget2.texture;
-        composer.passes[1].uniforms.uTime.value = performance.now();
+        composer.passes[1].uniforms.uTime.value += performance.now() - prev_time;
         composer.passes[1].uniforms.uCameraPosition.value = camera.position;
         composer.passes[1].uniforms.projectionMatrixInverse.value = camera.projectionMatrixInverse;
         composer.passes[1].uniforms.viewMatrixInverse.value = camera.matrixWorld;
     }
+    prev_time = performance.now();
 
     updateChunksShaderTime();
 
