@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'control';
 import { updateChunksShaderTime } from './chunk.js';
-import { updateNoiseGUI, updateAtmoshpereGUI } from './gui.js';
+import { updateNoiseGUI, updateAtmoshpereGUI, updateViewGUI } from './gui.js';
 import { GUI } from 'dat.gui';
 import { Player, updatePlayerGUI } from './entities/player.js';
 import { updateCameraGUI } from './entities/followCamera.js';
@@ -29,7 +29,8 @@ const playerSpawn = {
 const view = {
     fov: 75,
     near: 0.1,
-    far: 1000
+    far: 1000,
+    generation_distance: 7, // radius of chunks to generate
 }
 
 const atmosphere_param = {
@@ -54,7 +55,7 @@ document.body.appendChild(renderer.domElement);
 export const player = new Player(
     new THREE.Vector3(playerSpawn.position.x, playerSpawn.position.y, playerSpawn.position.z),
     new THREE.Vector3(playerSpawn.direction.x, playerSpawn.direction.y, playerSpawn.direction.z),
-    view_distance
+    view.generation_distance
 );
 
 const composer = new EffectComposer(renderer);
@@ -88,6 +89,7 @@ addShader(
     updateCameraGUI(gui, controls, player);
     updateLightGUI(gui, player);
     updateAtmoshpereGUI(gui, atmosphere_param, composer.passes[1]);
+    updateViewGUI(gui, view, player);
 });
 
 const controls = new OrbitControls(camera, renderer.domElement);

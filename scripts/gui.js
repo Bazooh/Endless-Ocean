@@ -32,3 +32,13 @@ export function updateAtmoshpereGUI(gui, atmosphere_param, shader) {
 
     folder.add(atmosphere_param, 'uRayNumberOfPoints', 1, 100, 1).onChange((value) => shader.uniforms.uRayNumberOfPoints.value = value);
 }
+
+
+export function updateViewGUI(gui, view, player) {
+    const folder = gui.addFolder('View');
+    folder.add(view, 'generation_distance', 1, 64, 1).name("Generation Distance").onChange((new_value) => {
+        player.view_distance = new_value;
+        player.unloadFarChunks();
+        player.loadSurroundingChunks();
+    });
+}
