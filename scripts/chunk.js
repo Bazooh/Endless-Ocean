@@ -97,6 +97,8 @@ class chunk {
         this.y = y;
         this.z = z;
 
+        this.is_loaded = false;
+
         this.load();
     }
 
@@ -115,11 +117,6 @@ class chunk {
 
     get position() {
         return this.mesh?.position;
-    }
-
-
-    isLoaded() {
-        return this.mesh !== undefined;
     }
 
 
@@ -152,7 +149,7 @@ class chunk {
 
 
     unload() {
-        if (!this.isLoaded()) {
+        if (!this.is_loaded) {
             return;
         }
 
@@ -160,6 +157,7 @@ class chunk {
         this.material.dispose();
         scene.remove(this.mesh);
         this.mesh = undefined;
+        this.is_loaded = false;
     }
 
 
