@@ -2,6 +2,8 @@ import { forceChunksUpdate } from "./chunk.js";
 import { updateLightGUI } from "./light.js";
 import { noise_param } from "./marching_cubes/noise.js";
 import * as THREE from 'three';
+import { camera_param } from "./entities/followCamera.js";
+import { player_param } from "./entities/player.js";
 import { PRESETS } from "./presets.js";
 
 
@@ -88,6 +90,19 @@ export function updatePresetGUI(gui, { time, atmosphere_param }) {
         atmosphere_param.uSunColor = current_preset.atmosphere_param.uSunColor;
         atmosphere_param.uRayNumberOfPoints = current_preset.atmosphere_param.uRayNumberOfPoints;
 
-        forceChunksUpdate();
+        camera_param.updateCamera = current_preset.camera_param.updateCamera;
+        camera_param.followSpeed = current_preset.camera_param.followSpeed;
+        camera_param.offset = current_preset.camera_param.offset;
+        camera_param.lookPosition = current_preset.camera_param.lookPosition;
+
+        player_param.enableCollisions = current_preset.player_param.enableCollisions;
+        player_param.horizontalAcceleration = current_preset.player_param.horizontalAcceleration;
+        player_param.verticalAcceleration = current_preset.player_param.verticalAcceleration;
+        player_param.friction = current_preset.player_param.friction;
+        player_param.rotationSpeed = current_preset.player_param.rotationSpeed;
+
+        gui.updateDisplay();
+        try { forceChunksUpdate(); }
+        catch (e) { console.error(e); }
     });
 }

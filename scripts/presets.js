@@ -21,6 +21,27 @@ export const PRESETS = {
       uSunColor: { r: 1, g: 1, b: 1 },
       uRayNumberOfPoints: 40,
     },
+    camera_param: {
+      updateCamera: true,
+      followSpeed: 1,
+      offset: {
+        x: 0,
+        y: 4,
+        z: 6,
+      },
+      lookPosition: {
+        x: 0,
+        y: 0,
+        z: -2,
+      },
+    },
+    player_param: {
+      enableCollisions: true,
+      horizontalAcceleration: 20,
+      verticalAcceleration: 20,
+      friction: 2,
+      rotationSpeed: 1,
+    }
   },
   cinematic: {
     noise_param: {
@@ -43,5 +64,26 @@ export const PRESETS = {
       uSunColor: { r: 1, g: 1, b: 1 },
       uRayNumberOfPoints: 40,
     },
+    camera_param: {
+      updateCamera: true,
+      followSpeed: 0.2,
+      offset: {
+        x: -2,
+        y: 6,
+        z: 6,
+      },
+      lookPosition: {
+        x: 2,
+        y: 0,
+        z: -2,
+      },
+    },
+    player_param: {
+      enableCollisions: true,
+      horizontalAcceleration: 8,
+      verticalAcceleration: 4,
+      friction: 2,
+      rotationSpeed: 0.5,
+    }
   },
 }
