@@ -3,7 +3,8 @@ import { MTLLoader } from '../../build/loaders/MTLLoader.js';
 import { OBJLoader } from '../../build/loaders/OBJLoader.js';
 import { GetAllFish, GetChunkKeyAtPosition, GetFishInNearbyChunks, EnterChunk } from './fishSpawner.js';
 import { noise_param } from '../marching_cubes/noise.js'
-import { chunk_size, getNormal, noise } from '../chunk.js';
+import { chunk_size, getNormal } from '../chunk.js';
+import { noise } from '../marching_cubes/noise.js';
 import { player } from '../scene.js';
 
 const maxDistance = 30;

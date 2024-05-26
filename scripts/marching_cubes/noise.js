@@ -14,6 +14,8 @@ export const noise_param = {
     floor_level: -8
 };
 
+export let noise = createNoise();
+
 
 function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
@@ -29,6 +31,11 @@ function surfaceMask(x, y, z) {
 function floorMask(x, y, z) {
     const value = (y - noise_param.floor_level) / noise_param.floor_transition_height;
     return clamp(value, 0, 1);
+}
+
+
+export function updateNoise() {
+    noise = createNoise();
 }
 
 

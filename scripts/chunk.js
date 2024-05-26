@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createNoise, noise_param } from './marching_cubes/noise.js';
+import { noise, noise_param, updateNoise } from './marching_cubes/noise.js';
 import { getNormalChunkCoords } from "./marching_cubes/marching_cubes.js";
 import { addShader } from './shader.js';
 import { createWaterGeometry } from './water.js';
@@ -13,10 +13,10 @@ export const n_vertices = new THREE.Vector3(16, 16, 16);
 
 export const chunk_lines = {};
 
-export const noise = createNoise();
-
 
 export function unloadAllChunks() {
+    updateNoise();
+    
     Object.values(chunk_lines).forEach((chunkLine) => {
         chunkLine.unload();
     });

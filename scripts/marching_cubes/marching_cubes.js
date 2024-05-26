@@ -1,11 +1,10 @@
 import * as THREE from '../../build/three.module.js';
 import { edgeTable, triTable } from './tables.js';
-import { createNoise } from './noise.js';
+import { noise } from './noise.js';
 
 
 const epsilon = 0.05;
 const N_VERTICES_MAX = 10_000;
-const noise = createNoise();
 
 
 export function getNormalChunkCoords(x, y, z) {
