@@ -4,6 +4,7 @@ import { noise_param } from "./marching_cubes/noise.js";
 import * as THREE from 'three';
 import { camera_param } from "./entities/followCamera.js";
 import { player_param } from "./entities/player.js";
+import { light_param } from "./light.js";
 import { PRESETS } from "./presets.js";
 
 
@@ -108,6 +109,12 @@ export function updatePresetGUI(gui, { time, atmosphere_param }) {
         player_param.verticalAcceleration = current_preset.player_param.verticalAcceleration;
         player_param.friction = current_preset.player_param.friction;
         player_param.rotationSpeed = current_preset.player_param.rotationSpeed;
+
+        light_param.intensity = current_preset.light_param.intensity;
+        light_param.direction_theta = current_preset.light_param.direction_theta;
+        light_param.direction_phi = current_preset.light_param.direction_phi;
+        light_param.color = current_preset.light_param.color;
+        light_param.angle = current_preset.light_param.angle;
 
         gui.updateDisplay();
         try { forceChunksUpdate(); }

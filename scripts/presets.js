@@ -1,3 +1,4 @@
+import { light_param } from "./light";
 
 export const PRESETS = {
   default: {
@@ -12,6 +13,13 @@ export const PRESETS = {
       uTimeOfDay: 0,
       dayLength: 10,
       timeStatic: false,
+    },
+    light_param: {
+      intensity: 100.0,
+      color: 0xffffff,
+      direction_theta: 2.2,
+      direction_phi: Math.PI,
+      angle: 1.0
     },
     atmosphere_param: {
       uSunIntensity: 1.0,
@@ -55,6 +63,13 @@ export const PRESETS = {
       uTimeOfDay: 0,
       dayLength: 80,
       timeStatic: true,
+    },
+    light_param: {
+      intensity: 40.0,
+      color: 0xffffff,
+      direction_theta: 2.2,
+      direction_phi: Math.PI,
+      angle: 1.3
     },
     atmosphere_param: {
       uSunIntensity: 1.0,
