@@ -1,4 +1,3 @@
-import { light_param } from "./light";
 
 export const PRESETS = {
   default: {

@@ -1,5 +1,4 @@
 import { forceChunksUpdate } from "./chunk.js";
-import { updateLightGUI } from "./light.js";
 import { noise_param } from "./marching_cubes/noise.js";
 import * as THREE from 'three';
 import { camera_param } from "./entities/followCamera.js";
