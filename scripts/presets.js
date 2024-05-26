@@ -1,13 +1,6 @@
 
 export const PRESETS = {
   default: {
-    noise_param: {
-      frequency: 1,
-      n_octaves: 4,
-      persistence: 0.5,
-      lacunarity: 2,
-      threshold: 0,
-    },
     time: {
       uTimeOfDay: 0,
       dayLength: 10,
@@ -51,13 +44,6 @@ export const PRESETS = {
     }
   },
   cinematic: {
-    noise_param: {
-      frequency: 0.1,
-      n_octaves: 8,
-      persistence: 0.5,
-      lacunarity: 2,
-      threshold: 0,
-    },
     time: {
       uTimeOfDay: 0,
       dayLength: 80,

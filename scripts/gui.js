@@ -73,12 +73,6 @@ export function updatePresetGUI(gui, { time, atmosphere_param }) {
     folder.add(preset, 'preset', ['default', 'cinematic']).onChange((value) => {
         const current_preset = PRESETS[value];
 
-        noise_param.frequency = current_preset.noise_param.frequency;
-        noise_param.n_octaves = current_preset.noise_param.n_octaves;
-        noise_param.persistence = current_preset.noise_param.persistence;
-        noise_param.lacunarity = current_preset.noise_param.lacunarity;
-        noise_param.threshold = current_preset.noise_param.threshold;
-
         time.uTimeOfDay = current_preset.time.uTimeOfDay;
         time.dayLength = current_preset.time.dayLength;
         time.timeStatic = current_preset.time.timeStatic;
@@ -116,7 +110,5 @@ export function updatePresetGUI(gui, { time, atmosphere_param }) {
         light_param.angle = current_preset.light_param.angle;
 
         gui.updateDisplay();
-        try { forceChunksUpdate(); }
-        catch (e) { console.error(e); }
     });
 }
