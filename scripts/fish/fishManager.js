@@ -15,8 +15,8 @@ export function Run() {
   var bluetang = new FishData("Bluetang", "Dory.obj", "Dory.mtl", bluetangData);
   bluetang.setColour(new THREE.Color(0.2, 0.2, 0.8), 0, 0.3)
 
-  SpawnFish(clownfish, 0);
-  SpawnFish(bluetang, 0);
+  SpawnFish(clownfish, 1000);
+  SpawnFish(bluetang, 1000);
 
   current_time = performance.now();
   prev_time = current_time;
