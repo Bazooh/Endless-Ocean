@@ -16,7 +16,7 @@ export const chunk_lines = {};
 
 export function unloadAllChunks() {
     updateNoise();
-    
+
     Object.values(chunk_lines).forEach((chunkLine) => {
         chunkLine.unload();
     });
@@ -212,7 +212,7 @@ class verticalChunkLine {
         addShader('water', water_material, {uTime: performance.now()});
         this.water = new THREE.Mesh(water_geometry, water_material);
 
-        this.water.position.set(this.x * chunk_size.x, noise_param.surface_level, this.z * chunk_size.z);
+        this.water.position.set(this.x * chunk_size.x, noise_param.sea_level * chunk_size.y, this.z * chunk_size.z);
         this.water.rotation.x = -Math.PI / 2;
         scene.add(this.water);
 

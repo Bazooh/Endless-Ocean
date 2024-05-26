@@ -93,7 +93,7 @@ function offsetValue(value, amount, max = 0)
 
 function getSpawnY(spawn_x, spawn_z) {
 
-    let topPos = noise_param.surface_level * chunk_size.y;
+    let topPos = noise_param.sea_level * chunk_size.y;
     let bottomPos = (noise_param.floor_level - 1) * chunk_size.y;
    
     let upper = topPos;

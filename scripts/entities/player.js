@@ -1,17 +1,18 @@
 import * as THREE from 'three';
 import { camera } from '../scene.js';
 import { Entity } from './entity.js';
-import {Input} from './input.js';
+import { Input } from './input.js';
 import { FollowCamera } from './followCamera.js';
-import { canMoveTo, updateChunksShaderUniforms, getChunkLineByWorldPos, getChunkLinePosByWorldPos, createChunksFromTopToBottom, chunk_lines } from '../chunk.js';
+import { canMoveTo, updateChunksShaderUniforms, getChunkLineByWorldPos, getChunkLinePosByWorldPos, createChunksFromTopToBottom, chunk_lines, chunk_size } from '../chunk.js';
 import { getLightDirection } from '../light.js';
-import {FBXLoader} from 'FBXLoader';
+import { FBXLoader } from 'FBXLoader';
+import { noise_param } from '../marching_cubes/noise.js';
 
 
 const up = new THREE.Vector3(0, 1, 0);
 const zero = new THREE.Vector3(0, 0, 0);
 
-const maxHeight = -0.5;
+const maxHeight = -2;
 var modelOffset = new THREE.Vector3(0, -1, 0);
 
 const collisionOffsets = [
@@ -27,6 +28,7 @@ export const player_param = {
     verticalAcceleration: 20,
     friction: 2,
     rotationSpeed: 1,
+    canFly: false,
 };
 
 export function updatePlayerGUI(gui, player) {
@@ -37,7 +39,7 @@ export function updatePlayerGUI(gui, player) {
     folder.add(player_param, 'verticalAcceleration', 1, 50, 1).name("V Acceleration");
     folder.add(player_param, 'friction', 0, 5, 0.1).name("Friction");
     folder.add(player_param, 'rotationSpeed', 0.5, 5, 0.5).name("Rotation Speed");
-    
+    folder.add(player_param, 'canFly').name("Can Fly");
 }
 
 
@@ -217,7 +219,8 @@ export class Player extends Entity {
         this.velocity.add(this.acceleration.clone().multiplyScalar(delta_time));
 
         var targetPosition = this.position.clone().add(this.velocity.clone().multiplyScalar(delta_time));
-        if (targetPosition.y > maxHeight) targetPosition.y = maxHeight;
+        if (!player_param.canFly && targetPosition.y > noise_param.sea_level*chunk_size.y + maxHeight)
+            targetPosition.y = noise_param.sea_level*chunk_size.y + maxHeight;
 
         var targetRotation = this._getAxis(this.input.left, this.input.right) * player_param.rotationSpeed * delta_time;
 

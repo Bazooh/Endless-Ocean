@@ -10,8 +10,9 @@ export const noise_param = {
     threshold: 0.2,
     surface_transition_height: 5, // in chunks (can be float)
     floor_transition_height: 1, // in chunks (can be float)
-    surface_level: 0,
-    floor_level: -8
+    surface_level: 4,
+    floor_level: -8,
+    sea_level: 0,
 };
 
 export let noise = createNoise();

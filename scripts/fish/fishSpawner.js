@@ -42,7 +42,7 @@ export function Step(delta) {
 function GetSpawnPos() {
     return new THREE.Vector3(
         GetRandomOffset(spawnDistance), 
-        Math.random() * (noise_param.surface_level * chunk_size.y - noise_param.floor_level * chunk_size.y) + noise_param.floor_level * chunk_size.y, 
+        Math.random() * (noise_param.sea_level * chunk_size.y - noise_param.floor_level * chunk_size.y) + noise_param.floor_level * chunk_size.y, 
         GetRandomOffset(spawnDistance));
 }
 

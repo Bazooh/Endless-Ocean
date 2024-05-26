@@ -1,31 +1,32 @@
 import * as THREE from 'three';
 import { MTLLoader } from '../../build/loaders/MTLLoader.js';
 import { OBJLoader } from '../../build/loaders/OBJLoader.js';
-import { GetAllFish, GetChunkKeyAtPosition, GetFishInNearbyChunks, EnterChunk } from './fishSpawner.js';
+import { GetChunkKeyAtPosition, GetFishInNearbyChunks, EnterChunk } from './fishSpawner.js';
 import { noise_param } from '../marching_cubes/noise.js'
 import { chunk_size, getNormal } from '../chunk.js';
 import { noise } from '../marching_cubes/noise.js';
 import { player } from '../scene.js';
 
-const maxDistance = 30;
 
-const boundsSize = 50;
+const fishes_param = {
+    boundsSize: 50,
 
-const baseSeparationMultiplier = 1.5;
-const baseAlignmentMultiplier = 1;
-const baseCohesionMultiplier = 0.25;
+    baseSeparationMultiplier: 1.5,
+    baseAlignmentMultiplier: 1,
+    baseCohesionMultiplier: 0.25,
 
-const maxSteering = 0.5;
+    maxSteering: 0.5,
 
-const maxYMovement = 0.2;
+    maxYMovement: 0.2,
 
-const avoidTerrainCoefficient = 0.2; // The higher the value, the more the fish will avoid terrain
-const avoidTerrainThreshold = 0.9; // Value between 0 and 1 indicating how dense (equivalent to close to a wall) the terrain must be to avoid it
+    avoidTerrainCoefficient: 0.2, // The higher the value, the more the fish will avoid terrain
+    avoidTerrainThreshold: 0.9, // Value between 0 and 1 indicating how dense (equivalent to close to a wall) the terrain must be to avoid it
 
 
-const distancePlayerAvoiding = 5;
-const avoidingPlayerCoefficient = 2.0;
-const avoidingPlayerSpeed = 3.0;
+    distancePlayerAvoiding: 5,
+    avoidingPlayerCoefficient: 2.0,
+    avoidingPlayerSpeed: 3.0,
+}
 
 
 export class BoidData {
@@ -165,11 +166,11 @@ export class Fish {
             steer.add(this.calculateCohesion(sameFishNeighbours));
         }
 
-        steer.y = Math.min(steer.y, maxYMovement);
-        steer.y = Math.max(steer.y, -maxYMovement);
+        steer.y = Math.min(steer.y, fishes_param.maxYMovement);
+        steer.y = Math.max(steer.y, -fishes_param.maxYMovement);
 
-        if (newPos.y > noise_param.surface_level * chunk_size.y - 1) {
-            newPos.y = noise_param.surface_level * chunk_size.y - 1;
+        if (newPos.y > noise_param.sea_level * chunk_size.y - 1) {
+            newPos.y = noise_param.sea_level * chunk_size.y - 1;
             steer.y -= 1;
         }
 
@@ -181,16 +182,16 @@ export class Fish {
             let current_noise = noise(newPos.x / chunk_size.x, newPos.y / chunk_size.y, newPos.z / chunk_size.z);
             if (current_noise > noise_param.threshold)
                 current_noise = noise_param.threshold - 0.0001;
-            if (current_noise + 1 < avoidTerrainThreshold * (noise_param.threshold + 1))
+            if (current_noise + 1 < fishes_param.avoidTerrainThreshold * (noise_param.threshold + 1))
                 current_noise = -1;
 
             const density = (1 + current_noise) / (noise_param.threshold - current_noise);
-            steer.add(terrain_gradient.multiplyScalar(density * avoidTerrainCoefficient));
+            steer.add(terrain_gradient.multiplyScalar(density * fishes_param.avoidTerrainCoefficient));
         }
 
         let avoidingPlayer = false
-        if (player.position.distanceTo(newPos) < distancePlayerAvoiding) {
-            steer.add(newPos.clone().sub(player.position).normalize().multiplyScalar(avoidingPlayerCoefficient));
+        if (player.position.distanceTo(newPos) < fishes_param.distancePlayerAvoiding) {
+            steer.add(newPos.clone().sub(player.position).normalize().multiplyScalar(fishes_param.avoidingPlayerCoefficient));
             avoidingPlayer = true;
         }
 
@@ -202,8 +203,8 @@ export class Fish {
         this.direction = newDirection;
 
         //teleporting near player
-        const minPos = new THREE.Vector2(player.position.x - boundsSize, player.position.z - boundsSize)
-        const maxPos = new THREE.Vector2(player.position.x + boundsSize, player.position.z + boundsSize)
+        const minPos = new THREE.Vector2(player.position.x - fishes_param.boundsSize, player.position.z - fishes_param.boundsSize)
+        const maxPos = new THREE.Vector2(player.position.x + fishes_param.boundsSize, player.position.z + fishes_param.boundsSize)
        
         if (newPos.x < minPos.x) {
             newPos.x = maxPos.x;
@@ -219,13 +220,10 @@ export class Fish {
             newPos.z = minPos.y;
         }
 
-        
-
         this.position = newPos;
 
         if (avoidingPlayer)
-            this.direction.multiplyScalar(avoidingPlayerSpeed);
-
+            this.direction.multiplyScalar(fishes_param.avoidingPlayerSpeed);
 
         let newChunk = GetChunkKeyAtPosition(this.position.x, this.position.z);
         if (this.currentChunk != newChunk) {
@@ -262,9 +260,9 @@ export class Fish {
 
         steer.divideScalar(neighbours.length);
 
-        steer.multiplyScalar(baseSeparationMultiplier * this.data.boidData.separationMultiplier);
+        steer.multiplyScalar(fishes_param.baseSeparationMultiplier * this.data.boidData.separationMultiplier);
 
-        steer.clampLength(0, maxSteering);
+        steer.clampLength(0, fishes_param.maxSteering);
         
         return steer;
     }
@@ -279,9 +277,9 @@ export class Fish {
 
         steer.divideScalar(neighbours.length);
 
-        steer.multiplyScalar(baseAlignmentMultiplier * this.data.boidData.alignmentMultiplier);
+        steer.multiplyScalar(fishes_param.baseAlignmentMultiplier * this.data.boidData.alignmentMultiplier);
 
-        steer.clampLength(0, maxSteering);
+        steer.clampLength(0, fishes_param.maxSteering);
         
         return steer;
     }
@@ -298,9 +296,9 @@ export class Fish {
         averagePos.divideScalar(neighbours.length);
 
         steer = averagePos.sub(this.position);
-        steer.multiplyScalar(baseCohesionMultiplier * this.data.boidData.cohesionMultiplier);
+        steer.multiplyScalar(fishes_param.baseCohesionMultiplier * this.data.boidData.cohesionMultiplier);
 
-        steer.clampLength(0, maxSteering);
+        steer.clampLength(0, fishes_param.maxSteering);
         
 
         return steer;

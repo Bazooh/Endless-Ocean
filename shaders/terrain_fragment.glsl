@@ -13,7 +13,7 @@ uniform float uLightIntensity;
 vec3 normal;
 
 
-vec3 apply_lighting(vec3 color) {
+vec3 get_lighting() {
     vec3 pos = worldPosition - uLightPos;
     float angle = acos(dot(normalize(pos), uLightDir));
 
@@ -25,10 +25,7 @@ vec3 apply_lighting(vec3 color) {
     float diff = max(dot(normal, lightDir), 0.0);
     vec3 diffuse = diff * uLightColor * uLightIntensity / length(pos);
 
-    vec3 result = diffuse * color;
-    result = mix(result, vec3(0.0), smoothstep(0.4, 1.0, angle / uLightAngle));
-
-    return result;
+    return mix(diffuse, vec3(0.0), smoothstep(0.4, 1.0, angle / uLightAngle));
 }
 
 
@@ -48,7 +45,9 @@ void main() {
     normal = normalize(vNormal);
 
     vec3 color = get_color();
-    color = apply_lighting(color);
+    vec3 lighting = get_lighting();
+
+    color = mix(color, color * lighting, clamp(-worldPosition.y / 3.0, 0.0, 1.0));
 
     gl_FragColor = vec4(color, 1.0);
 }
