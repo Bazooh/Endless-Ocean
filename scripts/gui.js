@@ -84,16 +84,24 @@ export function updatePresetGUI(gui, { time, atmosphere_param }) {
         time.timeStatic = current_preset.time.timeStatic;
 
         atmosphere_param.uSunIntensity = current_preset.atmosphere_param.uSunIntensity;
-        atmosphere_param.uScatteringCoefficients = current_preset.atmosphere_param.uScatteringCoefficients;
         atmosphere_param.uAtmosphereHeight = current_preset.atmosphere_param.uAtmosphereHeight;
         atmosphere_param.uEarthRadius = current_preset.atmosphere_param.uEarthRadius;
-        atmosphere_param.uSunColor = current_preset.atmosphere_param.uSunColor;
         atmosphere_param.uRayNumberOfPoints = current_preset.atmosphere_param.uRayNumberOfPoints;
+        atmosphere_param.uScatteringCoefficients.r = current_preset.atmosphere_param.uScatteringCoefficients.r;
+        atmosphere_param.uScatteringCoefficients.g = current_preset.atmosphere_param.uScatteringCoefficients.g;
+        atmosphere_param.uScatteringCoefficients.b = current_preset.atmosphere_param.uScatteringCoefficients.b;
+        atmosphere_param.uSunColor.r = current_preset.atmosphere_param.uSunColor.r;
+        atmosphere_param.uSunColor.g = current_preset.atmosphere_param.uSunColor.g;
+        atmosphere_param.uSunColor.b = current_preset.atmosphere_param.uSunColor.b;
 
         camera_param.updateCamera = current_preset.camera_param.updateCamera;
         camera_param.followSpeed = current_preset.camera_param.followSpeed;
-        camera_param.offset = current_preset.camera_param.offset;
-        camera_param.lookPosition = current_preset.camera_param.lookPosition;
+        camera_param.offset.x = current_preset.camera_param.offset.x;
+        camera_param.offset.y = current_preset.camera_param.offset.y;
+        camera_param.offset.z = current_preset.camera_param.offset.z;
+        camera_param.lookPosition.x = current_preset.camera_param.lookPosition.x;
+        camera_param.lookPosition.y = current_preset.camera_param.lookPosition.y;
+        camera_param.lookPosition.z = current_preset.camera_param.lookPosition.z;
 
         player_param.enableCollisions = current_preset.player_param.enableCollisions;
         player_param.horizontalAcceleration = current_preset.player_param.horizontalAcceleration;

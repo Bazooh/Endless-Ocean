@@ -53,7 +53,7 @@ export const PRESETS = {
     },
     time: {
       uTimeOfDay: 0,
-      dayLength: 10,
+      dayLength: 80,
       timeStatic: true,
     },
     atmosphere_param: {
@@ -62,26 +62,26 @@ export const PRESETS = {
       uAtmosphereHeight: 1.0,
       uEarthRadius: 6.371,
       uSunColor: { r: 1, g: 1, b: 1 },
-      uRayNumberOfPoints: 40,
+      uRayNumberOfPoints: 100,
     },
     camera_param: {
       updateCamera: true,
       followSpeed: 0.2,
       offset: {
-        x: -2,
-        y: 6,
-        z: 6,
+        x: -4,
+        y: 4,
+        z: 8,
       },
       lookPosition: {
-        x: 2,
+        x: -2,
         y: 0,
-        z: -2,
+        z: -6,
       },
     },
     player_param: {
-      enableCollisions: true,
-      horizontalAcceleration: 8,
-      verticalAcceleration: 4,
+      enableCollisions: false,
+      horizontalAcceleration: 10,
+      verticalAcceleration: 5,
       friction: 2,
       rotationSpeed: 0.5,
     }
