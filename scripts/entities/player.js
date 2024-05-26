@@ -169,6 +169,7 @@ export class Player extends Entity {
     }
 
     checkInWall(position, rotation) {
+        if (!player_param.enableCollisions) return false;
 
         for (var i = 0; i < collisionOffsets.length; i++) {
 
