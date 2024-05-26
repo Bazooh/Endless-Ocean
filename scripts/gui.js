@@ -2,6 +2,7 @@ import { forceChunksUpdate } from "./chunk.js";
 import { updateLightGUI } from "./light.js";
 import { noise_param } from "./marching_cubes/noise.js";
 import * as THREE from 'three';
+import { PRESETS } from "./presets.js";
 
 
 // Menu visibility
@@ -59,5 +60,33 @@ export function updateViewGUI(gui, view, player) {
         player.view_distance = new_value;
         player.unloadFarChunks();
         player.loadSurroundingChunks();
+    });
+}
+
+export function updatePresetGUI(gui, { time, atmosphere_param }) {
+    const folder = gui.addFolder('Presets');
+    let preset = { preset: 'default' };
+
+    folder.add(preset, 'preset', ['default', 'cinematic']).onChange((value) => {
+        const current_preset = PRESETS[value];
+
+        noise_param.frequency = current_preset.noise_param.frequency;
+        noise_param.n_octaves = current_preset.noise_param.n_octaves;
+        noise_param.persistence = current_preset.noise_param.persistence;
+        noise_param.lacunarity = current_preset.noise_param.lacunarity;
+        noise_param.threshold = current_preset.noise_param.threshold;
+
+        time.uTimeOfDay = current_preset.time.uTimeOfDay;
+        time.dayLength = current_preset.time.dayLength;
+        time.timeStatic = current_preset.time.timeStatic;
+
+        atmosphere_param.uSunIntensity = current_preset.atmosphere_param.uSunIntensity;
+        atmosphere_param.uScatteringCoefficients = current_preset.atmosphere_param.uScatteringCoefficients;
+        atmosphere_param.uAtmosphereHeight = current_preset.atmosphere_param.uAtmosphereHeight;
+        atmosphere_param.uEarthRadius = current_preset.atmosphere_param.uEarthRadius;
+        atmosphere_param.uSunColor = current_preset.atmosphere_param.uSunColor;
+        atmosphere_param.uRayNumberOfPoints = current_preset.atmosphere_param.uRayNumberOfPoints;
+
+        forceChunksUpdate();
     });
 }
