@@ -1,7 +1,9 @@
 import { forceChunksUpdate } from "./chunk.js";
-import { updateLightGUI } from "./light.js";
 import { noise_param } from "./marching_cubes/noise.js";
 import * as THREE from 'three';
+import { camera_param } from "./entities/followCamera.js";
+import { player_param } from "./entities/player.js";
+import { light_param } from "./light.js";
 import { PRESETS } from "./presets.js";
 
 
@@ -71,23 +73,42 @@ export function updatePresetGUI(gui, { time, atmosphere_param }) {
     folder.add(preset, 'preset', ['default', 'cinematic']).onChange((value) => {
         const current_preset = PRESETS[value];
 
-        noise_param.frequency = current_preset.noise_param.frequency;
-        noise_param.n_octaves = current_preset.noise_param.n_octaves;
-        noise_param.persistence = current_preset.noise_param.persistence;
-        noise_param.lacunarity = current_preset.noise_param.lacunarity;
-        noise_param.threshold = current_preset.noise_param.threshold;
-
         time.uTimeOfDay = current_preset.time.uTimeOfDay;
         time.dayLength = current_preset.time.dayLength;
         time.timeStatic = current_preset.time.timeStatic;
 
         atmosphere_param.uSunIntensity = current_preset.atmosphere_param.uSunIntensity;
-        atmosphere_param.uScatteringCoefficients = current_preset.atmosphere_param.uScatteringCoefficients;
         atmosphere_param.uAtmosphereHeight = current_preset.atmosphere_param.uAtmosphereHeight;
         atmosphere_param.uEarthRadius = current_preset.atmosphere_param.uEarthRadius;
-        atmosphere_param.uSunColor = current_preset.atmosphere_param.uSunColor;
         atmosphere_param.uRayNumberOfPoints = current_preset.atmosphere_param.uRayNumberOfPoints;
+        atmosphere_param.uScatteringCoefficients.r = current_preset.atmosphere_param.uScatteringCoefficients.r;
+        atmosphere_param.uScatteringCoefficients.g = current_preset.atmosphere_param.uScatteringCoefficients.g;
+        atmosphere_param.uScatteringCoefficients.b = current_preset.atmosphere_param.uScatteringCoefficients.b;
+        atmosphere_param.uSunColor.r = current_preset.atmosphere_param.uSunColor.r;
+        atmosphere_param.uSunColor.g = current_preset.atmosphere_param.uSunColor.g;
+        atmosphere_param.uSunColor.b = current_preset.atmosphere_param.uSunColor.b;
 
-        forceChunksUpdate();
+        camera_param.updateCamera = current_preset.camera_param.updateCamera;
+        camera_param.followSpeed = current_preset.camera_param.followSpeed;
+        camera_param.offset.x = current_preset.camera_param.offset.x;
+        camera_param.offset.y = current_preset.camera_param.offset.y;
+        camera_param.offset.z = current_preset.camera_param.offset.z;
+        camera_param.lookPosition.x = current_preset.camera_param.lookPosition.x;
+        camera_param.lookPosition.y = current_preset.camera_param.lookPosition.y;
+        camera_param.lookPosition.z = current_preset.camera_param.lookPosition.z;
+
+        player_param.enableCollisions = current_preset.player_param.enableCollisions;
+        player_param.horizontalAcceleration = current_preset.player_param.horizontalAcceleration;
+        player_param.verticalAcceleration = current_preset.player_param.verticalAcceleration;
+        player_param.friction = current_preset.player_param.friction;
+        player_param.rotationSpeed = current_preset.player_param.rotationSpeed;
+
+        light_param.intensity = current_preset.light_param.intensity;
+        light_param.direction_theta = current_preset.light_param.direction_theta;
+        light_param.direction_phi = current_preset.light_param.direction_phi;
+        light_param.color = current_preset.light_param.color;
+        light_param.angle = current_preset.light_param.angle;
+
+        gui.updateDisplay();
     });
 }
