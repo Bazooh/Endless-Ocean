@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'control';
 import { updateChunksShaderTime } from './chunk.js';
-import { updateNoiseGUI, updateAtmoshpereGUI, updateViewGUI, updateTimeGUI } from './gui.js';
+import { updateNoiseGUI, updateAtmoshpereGUI, updateViewGUI, updateTimeGUI, updatePresetGUI } from './gui.js';
 import { GUI } from 'dat.gui';
 import { Player, updatePlayerGUI } from './entities/player.js';
 import { updateCameraGUI } from './entities/followCamera.js';
@@ -99,6 +99,7 @@ addShader(
     updateAtmoshpereGUI(gui, atmosphere_param, composer.passes[1]);
     updateViewGUI(gui, view, player);
     updateTimeGUI(gui, time, composer.passes[1]);
+    updatePresetGUI(gui, { time, atmosphere_param });
 });
 
 const controls = new OrbitControls(camera, renderer.domElement);
