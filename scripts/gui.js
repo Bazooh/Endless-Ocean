@@ -46,7 +46,7 @@ export function updateAtmoshpereGUI(gui, atmosphere_param, shader) {
     scatteringCoefficients.add(atmosphere_param.uScatteringCoefficients, 'g', 0, 50, 0.001).onChange((value) => shader.uniforms.uScatteringCoefficients.value = new THREE.Vector3(shader.uniforms.uScatteringCoefficients.value.x, value, shader.uniforms.uScatteringCoefficients.value.z));
     scatteringCoefficients.add(atmosphere_param.uScatteringCoefficients, 'b', 0, 50, 0.001).onChange((value) => shader.uniforms.uScatteringCoefficients.value = new THREE.Vector3(shader.uniforms.uScatteringCoefficients.value.x, shader.uniforms.uScatteringCoefficients.value.y, value));
 
-    folder.add(atmosphere_param, 'uAtmosphereHeight', 0, 5e-2, 1e-6).onChange((value) => shader.uniforms.uAtmosphereHeight.value = value);
+    folder.add(atmosphere_param, 'uAtmosphereHeight', 0, 5, 1e-3).onChange((value) => shader.uniforms.uAtmosphereHeight.value = value);
     folder.add(atmosphere_param, 'uEarthRadius', 0, 10, 1e-3).onChange((value) => shader.uniforms.uEarthRadius.value = value);
     
     const sunColorFolder = folder.addFolder('Sun Color');
