@@ -1,6 +1,7 @@
 uniform sampler2D tDiffuse;
 uniform sampler2D tDepth;
 uniform float uTime;
+uniform float uTimeOfDay;
 uniform vec3 uCameraPosition;
 
 uniform vec3 uScatteringCoefficients;
@@ -10,7 +11,6 @@ uniform vec3 uSunColor;
 uniform float uEarthRadius;
 uniform int uRayNumberOfPoints;
 uniform float uCloudsHeight;
-uniform float uSunTimePeriod;
 
 uniform mat4 projectionMatrixInverse;
 uniform mat4 viewMatrixInverse;
@@ -194,10 +194,10 @@ void main() {
 
     float depth = texture2D(tDepth, uv).r;
 
-    float dt = fract(uTime / uSunTimePeriod);
+    float dt = fract(uTimeOfDay / 24.0);
     float sunDistance = 149e3;
     float angle = 2.0 * pi * dt;
-    vec3 sunPosition = vec3(sunDistance * cos(angle), sunDistance * sin(angle), 0.0);
+    vec3 sunPosition = vec3(sunDistance * sin(angle), sunDistance * -cos(angle), 0.0);
 
     const vec3 farOceanColor = vec3(0.07, 0.07, 0.38);
 

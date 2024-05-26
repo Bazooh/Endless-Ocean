@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'control';
 import { updateChunksShaderTime } from './chunk.js';
-import { updateNoiseGUI, updateAtmoshpereGUI, updateViewGUI } from './gui.js';
+import { updateNoiseGUI, updateAtmoshpereGUI, updateViewGUI, updateTimeGUI } from './gui.js';
 import { GUI } from 'dat.gui';
 import { Player, updatePlayerGUI } from './entities/player.js';
 import { updateCameraGUI } from './entities/followCamera.js';
@@ -33,6 +33,12 @@ const view = {
     generation_distance: 7, // radius of chunks to generate
 }
 
+const time = {
+    uTimeOfDay: 0,
+    dayLength: 10,
+    timeStatic: false,
+}
+
 const atmosphere_param = {
     uSunIntensity: 1.0,
     uScatteringCoefficients: {r: 5.19673, g: 12.1427, b: 29.6453},
@@ -40,7 +46,6 @@ const atmosphere_param = {
     uEarthRadius: 6.371,
     uSunColor: {r: 1, g: 1, b: 1},
     uRayNumberOfPoints: 40,
-    uSunTimePeriod: 10,
 }
 
 const view_distance = 7; // in chunks
@@ -79,8 +84,9 @@ addShader(
         uSunIntensity: atmosphere_param.uSunIntensity,
         uEarthRadius: atmosphere_param.uEarthRadius,
         uSunColor: new THREE.Vector3(atmosphere_param.uSunColor.r, atmosphere_param.uSunColor.g, atmosphere_param.uSunColor.b),
-        uSunTimePeriod: atmosphere_param.uSunTimePeriod * 1000,
         uRayNumberOfPoints: atmosphere_param.uRayNumberOfPoints,
+        
+        uTimeOfDay: time.uTimeOfDay
     }
 ).then(([shader, _]) => {
     composer.addPass(new ShaderPass(shader));
@@ -92,26 +98,35 @@ addShader(
     updateLightGUI(gui, player);
     updateAtmoshpereGUI(gui, atmosphere_param, composer.passes[1]);
     updateViewGUI(gui, view, player);
+    updateTimeGUI(gui, time, composer.passes[1]);
 });
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.update();
 
 let prev_time = performance.now();
+let delta_time = 0;
+
 function animate() {
     requestAnimationFrame(animate);
 
     updateEntities();
+
+    delta_time = performance.now() - prev_time;
+    prev_time = performance.now();
+
+    if (!time.timeStatic)
+        time.uTimeOfDay = (time.uTimeOfDay + 24*delta_time / (1000*time.dayLength)) % 24;
     
     // update post-processing shader
     if (composer.passes[1] !== undefined) {
         composer.passes[1].uniforms.tDepth.value = composer.renderTarget2.texture;
-        composer.passes[1].uniforms.uTime.value += performance.now() - prev_time;
+        composer.passes[1].uniforms.uTime.value += delta_time;
+        composer.passes[1].uniforms.uTimeOfDay.value = time.uTimeOfDay;
         composer.passes[1].uniforms.uCameraPosition.value = camera.position;
         composer.passes[1].uniforms.projectionMatrixInverse.value = camera.projectionMatrixInverse;
         composer.passes[1].uniforms.viewMatrixInverse.value = camera.matrixWorld;
     }
-    prev_time = performance.now();
 
     updateChunksShaderTime();
 
