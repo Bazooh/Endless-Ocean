@@ -165,14 +165,14 @@ vec3 atmosphereColor(vec3 sunPosition, vec3 horizonColor) {
         return horizonColor;
     }
 
-    const vec3 sunColor = vec3(1.0, 0.97, 0.38);
+    // const vec3 sunColor = vec3(1.0, 0.97, 0.38);
 
     vec3 pos = vec3(0.0, uEarthRadius, 0.0);
     vec3 sky = intensity(pos, lookingDirection, sunPosition);
 
     float cos_theta = dot(normalize(sunPosition - pos), lookingDirection);
     if (cos_theta > 0.99) {
-        return mix(sky, sunColor, (cos_theta - 0.99) * (cos_theta - 0.99) * 10000.0);
+        return mix(sky, uSunColor, (cos_theta - 0.99) * (cos_theta - 0.99) * 10000.0);
     }
 
     return sky;
