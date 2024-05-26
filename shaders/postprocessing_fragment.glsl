@@ -33,6 +33,10 @@ bool isAtmoshepere(float depth) {
 }
 
 
+float cloudDensity(vec3 point) {
+    return texture(cloudTexture, fract(point / 2.0)).r * 2.0;
+}
+
 
 float density(vec3 point) {
     float altitude = length(point) - uEarthRadius;
@@ -164,8 +168,6 @@ vec3 atmosphereColor(vec3 sunPosition, vec3 horizonColor) {
         const vec3 spaceColor = vec3(0.0);
         return horizonColor;
     }
-
-    // const vec3 sunColor = vec3(1.0, 0.97, 0.38);
 
     vec3 pos = vec3(0.0, uEarthRadius, 0.0);
     vec3 sky = intensity(pos, lookingDirection, sunPosition);

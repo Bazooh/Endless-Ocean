@@ -1,17 +1,18 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'control';
 import { updateChunksShaderTime } from './chunk.js';
-import { updateNoiseGUI, updateAtmoshpereGUI, updateViewGUI, updateTimeGUI, updatePresetGUI } from './gui.js';
+import { updateNoiseGUI, updateAtmoshpereGUI, updateViewGUI, updateTimeGUI, updatePresetGUI, updateCloudsGUI } from './gui.js';
 import { GUI } from 'dat.gui';
 import { Player, updatePlayerGUI } from './entities/player.js';
 import { updateCameraGUI } from './entities/followCamera.js';
 import { updateLightGUI } from './light.js';
 import { updateEntities } from './entities/entity.js';
-import {Run} from './fish/fishManager.js';
+import { Run } from './fish/fishManager.js';
 import { addShader } from './shader.js';
 import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'https://cdn.jsdelivr.net/npm/three/examples/jsm/postprocessing/ShaderPass.js';
+import { getCloudsTexture, clouds_param } from './clouds.js';
 
 const playerSpawn = {
     position: {
@@ -100,6 +101,7 @@ addShader(
     updateViewGUI(gui, view, player);
     updateTimeGUI(gui, time, composer.passes[1]);
     updatePresetGUI(gui, { time, atmosphere_param });
+    updateCloudsGUI(gui, clouds_param);
 });
 
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -127,6 +129,7 @@ function animate() {
         composer.passes[1].uniforms.uCameraPosition.value = camera.position;
         composer.passes[1].uniforms.projectionMatrixInverse.value = camera.projectionMatrixInverse;
         composer.passes[1].uniforms.viewMatrixInverse.value = camera.matrixWorld;
+        composer.passes[1].uniforms.cloudTexture = { value: getCloudsTexture() };
     }
 
     updateChunksShaderTime();

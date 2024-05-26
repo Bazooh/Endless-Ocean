@@ -5,6 +5,7 @@ import { camera_param } from "./entities/followCamera.js";
 import { player_param } from "./entities/player.js";
 import { light_param } from "./light.js";
 import { PRESETS } from "./presets.js";
+import { updateCloudsNoise, updateDataTexture } from "./clouds.js";
 
 
 // Menu visibility
@@ -110,5 +111,22 @@ export function updatePresetGUI(gui, { time, atmosphere_param }) {
         light_param.angle = current_preset.light_param.angle;
 
         gui.updateDisplay();
+    });
+}
+
+
+export function updateCloudsGUI(gui, clouds_param) {
+    const clouds_folder = gui.addFolder('Clouds');
+
+    clouds_folder.add(clouds_param.n_pixels, 'x', 1, 128, 1).name('n_pixels').onChange(function (value) {
+        clouds_param.n_pixels = new THREE.Vector3(value, value, value);
+        updateDataTexture();
+    });
+
+    clouds_folder.add(clouds_param.n_points, 'x', 1, 128, 1).name('n_points').onChange(function (value) {
+        clouds_param.n_points = new THREE.Vector3(value, value, value);
+
+        updateCloudsNoise();
+        updateDataTexture();
     });
 }
