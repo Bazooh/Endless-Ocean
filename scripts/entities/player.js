@@ -7,6 +7,7 @@ import { canMoveTo, updateChunksShaderUniforms, getChunkLineByWorldPos, getChunk
 import { getLightDirection } from '../light.js';
 import { FBXLoader } from 'FBXLoader';
 import { noise_param } from '../marching_cubes/noise.js';
+import { Bubble } from './bubbles.js';
 
 
 const up = new THREE.Vector3(0, 1, 0);
@@ -43,14 +44,17 @@ export function updatePlayerGUI(gui, player) {
 }
 
 
-export class Player extends Entity {
+function lerp(a, b, t) {
+    return a + (b - a) * t;
+}
 
+
+export class Player extends Entity {
     constructor(starting_position, starting_direction, view_distance) {
         super(starting_position, starting_direction, {view_distance: view_distance});
     }
 
     onModelLoaded(object) {
-
         const texture = new THREE.TextureLoader().load('./../../models/submarine-low-poly/textures/Submarine__BaseColor.png'); 
         const normal = new THREE.TextureLoader().load('./../../models/submarine-low-poly/textures/Submarine__Normal.png'); 
         const metallic = new THREE.TextureLoader().load('./../../models/submarine-low-poly/textures/Submarine__Metallic.png'); 
@@ -62,46 +66,41 @@ export class Player extends Entity {
         object.rotation.y = Math.PI;
         object.position.add(modelOffset);
         
-        object.traverse( function ( child ) {
-
-            if ( child.isMesh ) {
-                child.material =  material;
+        object.traverse((child) => {
+            if (child.isMesh) {
+                child.material = material;
             }
-
-        } );
+        });
 
         this.object = object;
-
         this.model.add(object);
-
         this.modelLoaded = true;
 
-        //Test light
-        var light = new THREE.AmbientLight( 0xffffff );
-        light.position.set( 0, 1, 0 ).normalize();
+        // Light to see the model
+        var light = new THREE.AmbientLight(0xffffff);
+        light.position.set(0, 1, 0);
         scene.add(light);
-        
     }
 
 
     loadModel() {
-
         this.model = new THREE.Object3D();
         const fbxLoader = new FBXLoader()
-        fbxLoader.load('./../../models/submarine-low-poly/source/Submarine Low-poly.fbx', 
-        (object) => this.onModelLoaded(object),
-        (xhr) => {},
-        (error) => {console.log(error)});
+        fbxLoader.load(
+            './../../models/submarine-low-poly/source/Submarine Low-poly.fbx', 
+            (object) => this.onModelLoaded(object),
+            (xhr) => {},
+            (error) => {console.log(error)}
+        );
 
         this.input = new Input();
-         this.followCamera = new FollowCamera(camera, this);
+        this.followCamera = new FollowCamera(camera, this);
     }
 
     setTransparent(transparent) {
         if (!this.modelLoaded) return;
 
         this.object.visible = !transparent;
-
     }
 
 
@@ -170,6 +169,7 @@ export class Player extends Entity {
         updateChunksShaderUniforms({'uLightDir': getLightDirection(this.direction)});
     }
 
+
     checkInWall(position, rotation) {
         if (!player_param.enableCollisions) return false;
 
@@ -205,7 +205,6 @@ export class Player extends Entity {
 
 
     update(delta_time) {
-
         if (!this.modelLoaded) return false;
 
         //Acceleration based on input
@@ -217,6 +216,8 @@ export class Player extends Entity {
 
         //Velocity
         this.velocity.add(this.acceleration.clone().multiplyScalar(delta_time));
+
+        this.animate(delta_time);
 
         var targetPosition = this.position.clone().add(this.velocity.clone().multiplyScalar(delta_time));
         if (!player_param.canFly && targetPosition.y > noise_param.sea_level*chunk_size.y + maxHeight)
@@ -235,6 +236,25 @@ export class Player extends Entity {
         
         //Camera
         this.followCamera.update(delta_time);
-        
+    }
+
+    animate(delta_time) {
+        const roll = 0.2*(this.input.right - this.input.left);
+        this.object.rotation.z = lerp(this.object.rotation.z, roll, 1 * delta_time);
+
+        const pitch = 0.5*(this.input.up - this.input.down)*Math.min(1.0, 0.05*this.velocity.length());
+        this.object.rotation.x = lerp(this.object.rotation.x, pitch, 1 * delta_time);
+
+        if (this.input.forward || this.input.backward) {
+            const rotateDir = this.direction.clone().normalize().cross(up);
+            for (let i = 0; i < 5; i++) {
+                let offset = new THREE.Vector2().random().multiplyScalar(2).addScalar(-1);
+                offset = new THREE.Vector3(offset.x, 0, offset.y);
+                offset.applyAxisAngle(rotateDir, Math.random() * Math.PI / 2);
+                offset.multiplyScalar(0.3);
+                offset.addScaledVector(this.direction, -1.7);
+                new Bubble(this.position.clone().add(offset), this.direction.clone().multiplyScalar(-1), 5, 1);
+            }
+        }
     }
 }

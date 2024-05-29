@@ -125,6 +125,8 @@ class chunk {
             return;
         }
 
+        this.should_unload = false;
+
         marchingCubes(
             new Vector3(this.x, this.y, this.z),
             n_vertices,
@@ -138,17 +140,22 @@ class chunk {
             
             const material = new THREE.ShaderMaterial({side: THREE.DoubleSide, wireframe: false});
             addShader('terrain', material, Object.assign({uTime: 0}, getLightUniforms())).then(() => {
+                if (this.should_unload) {
+                    return;
+                }
+                
                 this.mesh = new THREE.Mesh(geometry, material);
                 this.mesh.layers.enable(1);
                 scene.add(this.mesh);
+                this.is_loaded = true
             });
         });
-
-        this.is_loaded = true
     }
 
 
     unload() {
+        this.should_unload = true;
+
         if (!this.is_loaded) {
             return;
         }

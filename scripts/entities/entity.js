@@ -55,12 +55,18 @@ export class Entity {
         if (this.model != null) {
             scene.add(this.model);
         }
-       
+    }
+
+    remove() {
+        if (this.model != null) {
+            scene.remove(this.model);
+        }
+        entities.splice(entities.indexOf(this), 1);
     }
 
     get yRotation() {
         var angle = Math.atan2(this.direction.x, this.direction.z);
-        if (angle <0) angle += 2 * Math.PI;
+        if (angle < 0) angle += 2 * Math.PI;
         return angle;
     }
 
@@ -71,7 +77,6 @@ export class Entity {
         const deltaTime = (current_time - this.prev_time) / 1000;
         this.prev_time = current_time;
 
-        if (deltaTime < 3) this.update(deltaTime);
+        this.update(Math.min(deltaTime, 0.1));
     }
-
 }

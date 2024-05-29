@@ -37,7 +37,7 @@ function updateLoop() {
     var delta = (current_time - prev_time) / 1000;
     prev_time = current_time;
 
-    if (delta < 3)  Step(delta);
+    Step(Math.min(delta, 0.1));
 
     requestAnimationFrame(updateLoop);
 };
