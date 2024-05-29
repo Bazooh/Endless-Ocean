@@ -55,6 +55,9 @@ export function updateAtmoshpereGUI(gui, atmosphere_param, shader) {
     sunColorFolder.add(atmosphere_param.uSunColor, 'b', 0, 1, 0.01).onChange((value) => shader.uniforms.uSunColor.value = new THREE.Vector3(shader.uniforms.uSunColor.value.x, shader.uniforms.uSunColor.value.y, value));
 
     folder.add(atmosphere_param, 'uRayNumberOfPoints', 1, 100, 1).onChange((value) => shader.uniforms.uRayNumberOfPoints.value = value);
+
+    folder.add(atmosphere_param, 'starsThreshold', 0, 1, 0.01).onChange((value) => shader.uniforms.uStarsThreshold.value = value);
+    folder.add(atmosphere_param, 'starsDensity', 0, 1000, 1).onChange((value) => shader.uniforms.uStarsDensity.value = value);
 }
 
 

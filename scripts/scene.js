@@ -47,6 +47,8 @@ const atmosphere_param = {
     uEarthRadius: 6.371,
     uSunColor: {r: 1, g: 1, b: 1},
     uRayNumberOfPoints: 40,
+    uStarsThreshold: 0.8,
+    uStarsDensity: 100,
 }
 
 const view_distance = 7; // in chunks
@@ -86,8 +88,10 @@ addShader(
         uEarthRadius: atmosphere_param.uEarthRadius,
         uSunColor: new THREE.Vector3(atmosphere_param.uSunColor.r, atmosphere_param.uSunColor.g, atmosphere_param.uSunColor.b),
         uRayNumberOfPoints: atmosphere_param.uRayNumberOfPoints,
+        uStarsThreshold: atmosphere_param.uStarsThreshold,
+        uStarsDensity: atmosphere_param.uStarsDensity,
         
-        uTimeOfDay: time.uTimeOfDay
+        uTimeOfDay: time.uTimeOfDay,
     }
 ).then(([shader, _]) => {
     composer.addPass(new ShaderPass(shader));
