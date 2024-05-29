@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'control';
 import { updateChunksShaderTime } from './chunk.js';
-import { updateNoiseGUI, updateAtmoshpereGUI, updateViewGUI, updateTimeGUI, updatePresetGUI, updateCloudsGUI } from './gui.js';
+import { updateNoiseGUI, updateAtmoshpereGUI, updateViewGUI, updateTimeGUI, updatePresetGUI, updateCloudsGUI, updateFishGUI } from './gui.js';
 import { GUI } from 'dat.gui';
 import { Player, updatePlayerGUI } from './entities/player.js';
 import { updateCameraGUI } from './entities/followCamera.js';
@@ -13,6 +13,8 @@ import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three/examples/jsm/
 import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'https://cdn.jsdelivr.net/npm/three/examples/jsm/postprocessing/ShaderPass.js';
 import { getCloudsTexture, clouds_param } from './clouds.js';
+import { fishes_param } from './fish/fish.js';
+
 
 const playerSpawn = {
     position: {
@@ -106,6 +108,7 @@ addShader(
     updateTimeGUI(gui, time, composer.passes[1]);
     updatePresetGUI(gui, { time, atmosphere_param });
     updateCloudsGUI(gui, clouds_param);
+    updateFishGUI(gui, fishes_param);
 });
 
 const controls = new OrbitControls(camera, renderer.domElement);

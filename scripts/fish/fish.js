@@ -8,7 +8,10 @@ import { noise } from '../marching_cubes/noise.js';
 import { player } from '../scene.js';
 
 
-const fishes_param = {
+export const fishes_param = {
+    clownfish_count: 300,
+    bluetang_count: 300,
+
     boundsSize: 50,
 
     baseSeparationMultiplier: 1.5,
@@ -21,7 +24,6 @@ const fishes_param = {
 
     avoidTerrainCoefficient: 0.2, // The higher the value, the more the fish will avoid terrain
     avoidTerrainThreshold: 0.9, // Value between 0 and 1 indicating how dense (equivalent to close to a wall) the terrain must be to avoid it
-
 
     distancePlayerAvoiding: 5,
     avoidingPlayerCoefficient: 2.0,
@@ -39,7 +41,6 @@ export class BoidData {
         this.alignmentMultiplier = alignmentMultiplier;
         this.cohesionMultiplier = cohesionMultiplier;
     }
-
 }
 
 export class FishData {
@@ -63,7 +64,7 @@ export class FishData {
 
 export class Fish {
    
-    constructor(fishdata, starting_position, starting_direction, centre, id, isBoss = false) {
+    constructor(fishdata, starting_position, starting_direction, centre, id) {
         this.position = starting_position;
         this.direction = starting_direction;
 
@@ -71,7 +72,6 @@ export class Fish {
         this.id = id;
 
         this.data = fishdata;
-        this.isBoss = isBoss;
 
         this.loadModel();
 
@@ -83,11 +83,9 @@ export class Fish {
 
         this.currentChunk = GetChunkKeyAtPosition(this.position.x, this.position.z);
         EnterChunk(this, null, this.currentChunk);
- 
     }
 
     loadModel() {
-
         this.model = new THREE.Object3D();
 
         let mtlLoader = new MTLLoader();

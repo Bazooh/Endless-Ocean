@@ -6,6 +6,7 @@ import { player_param } from "./entities/player.js";
 import { light_param } from "./light.js";
 import { PRESETS } from "./presets.js";
 import { updateCloudsNoise, updateDataTexture } from "./clouds.js";
+import { updateFish } from "./fish/fishManager.js";
 
 
 // Menu visibility
@@ -56,8 +57,8 @@ export function updateAtmoshpereGUI(gui, atmosphere_param, shader) {
 
     folder.add(atmosphere_param, 'uRayNumberOfPoints', 1, 100, 1).onChange((value) => shader.uniforms.uRayNumberOfPoints.value = value);
 
-    folder.add(atmosphere_param, 'starsThreshold', 0, 1, 0.01).onChange((value) => shader.uniforms.uStarsThreshold.value = value);
-    folder.add(atmosphere_param, 'starsDensity', 0, 1000, 1).onChange((value) => shader.uniforms.uStarsDensity.value = value);
+    folder.add(atmosphere_param, 'uStarsThreshold', 0, 1, 0.01).onChange((value) => shader.uniforms.uStarsThreshold.value = value);
+    folder.add(atmosphere_param, 'uStarsDensity', 0, 1000, 1).onChange((value) => shader.uniforms.uStarsDensity.value = value);
 }
 
 
@@ -115,6 +116,14 @@ export function updatePresetGUI(gui, { time, atmosphere_param }) {
 
         gui.updateDisplay();
     });
+}
+
+
+export function updateFishGUI(gui, fishes_param) {
+    const folder = gui.addFolder('Fish');
+
+    folder.add(fishes_param, 'clownfish_count', 0, 1000, 1).name('Clownfish').onChange(updateFish);
+    folder.add(fishes_param, 'bluetang_count', 0, 1000, 1).name('Bluetang').onChange(updateFish);
 }
 
 

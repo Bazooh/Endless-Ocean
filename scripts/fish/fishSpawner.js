@@ -3,35 +3,43 @@ import {Fish, FishData} from './fish.js';
 import {noise_param} from '../marching_cubes/noise.js'
 import { chunk_size } from '../chunk.js';
 
-const centre = new THREE.Vector3(0,0,0);
+
+const centre = new THREE.Vector3(0, 0, 0);
 
 const spawnDistance = 20;
 
-const fishArray = [];
+let fishArray = [];
 var fishId = 0;
 
 const chunkSize = 4;
 const fishChunks = new Map();
 
-var hasBoss = false;
 
-export function GetAllFish() {return fishArray};
+export function GetAllFish() { return fishArray; }
+
+
+export function DispawnAllFish() {
+    for (var i = 0; i < fishArray.length; ++i) {
+        scene.remove(fishArray[i].model);
+        delete fishArray[i];
+    }
+    fishArray = [];
+    fishId = 0;
+}
+
 
 export function SpawnFish(fishData, count) {
-
     for (var i = 0; i < count; ++i) {
         var pos = GetSpawnPos();
         var dir = GetSpawnDir();
-        var fish =  new Fish(fishData, pos, dir, centre, fishId, !hasBoss)
+        var fish = new Fish(fishData, pos, dir, centre, fishId);
         fishId++;
         fishArray.push(fish);
-
-        if (!hasBoss) hasBoss = true;
     }
 }
 
-export function Step(delta) {
 
+export function Step(delta) {
     //Move Fish
     for (var i = 0; i < fishArray.length; ++i) {
         fishArray[i].step(delta);
@@ -43,8 +51,10 @@ function GetSpawnPos() {
     return new THREE.Vector3(
         GetRandomOffset(spawnDistance), 
         Math.random() * (noise_param.sea_level * chunk_size.y - noise_param.floor_level * chunk_size.y) + noise_param.floor_level * chunk_size.y, 
-        GetRandomOffset(spawnDistance));
+        GetRandomOffset(spawnDistance)
+    );
 }
+
 
 function GetSpawnDir() {
     var dir = new THREE.Vector3(GetRandomOffset(1), GetRandomOffset(1), GetRandomOffset(1));
@@ -52,9 +62,11 @@ function GetSpawnDir() {
     return dir;
 }
 
+
 function GetRandomOffset(max) {
     return Math.random() * max * 2 - max;
 }
+
 
 export function GetChunkKeyAtPosition(x, z) {
     var chunkKey = Math.floor(parseInt(x) / chunkSize).toString() + ',' +  Math.floor(parseInt(z) / chunkSize).toString();
@@ -65,6 +77,7 @@ export function GetChunkKeyAtPosition(x, z) {
 
     return chunkKey;
 }
+
 
 export function EnterChunk(fish, oldChunk, newChunk) {
 
@@ -77,10 +90,9 @@ export function EnterChunk(fish, oldChunk, newChunk) {
 
 }
 
+
 export function GetFishInNearbyChunks(currentChunk) {
     var fishArray = [];
-
-    
 
     for (var x = -1; x <= 1; x++) {
         for (var z = -1; z <= 1; z++) {
@@ -98,4 +110,3 @@ export function GetFishInNearbyChunks(currentChunk) {
 
     return fishArray;
 }
-
