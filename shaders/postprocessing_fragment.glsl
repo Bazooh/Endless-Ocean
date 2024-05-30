@@ -231,13 +231,12 @@ vec3 intensity(vec3 pos, vec3 dir, vec3 sunPosition) {
 
 
 vec3 getLookingDirection() {
-    // FIXME : When the position is not (0, 0) the result is not correct
     vec4 clipSpaceCoordinate = vec4(vUv * 2.0 - 1.0, 1.0, 1.0);
     vec4 viewSpaceCoordinate = projectionMatrixInverse * clipSpaceCoordinate;
     viewSpaceCoordinate /= viewSpaceCoordinate.w;
     vec4 worldSpaceCoordinates = viewMatrixInverse * viewSpaceCoordinate;
 
-    return normalize(worldSpaceCoordinates.xyz);
+    return normalize(worldSpaceCoordinates.xyz - uCameraPosition);
 }
 
 

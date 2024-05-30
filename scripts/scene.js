@@ -18,7 +18,7 @@ import { fishes_param } from './fish/fish.js';
 
 const playerSpawn = {
     position: {
-        x: 0,
+        x: 1000,
         y: -0.5,
         z: 0
     },
@@ -52,8 +52,6 @@ const atmosphere_param = {
     uStarsThreshold: 0.8,
     uStarsDensity: 100,
 }
-
-const view_distance = 7; // in chunks
 
 globalThis.scene = new THREE.Scene();
 
