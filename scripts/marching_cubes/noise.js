@@ -41,29 +41,26 @@ export function updateNoise() {
 
 
 export function createNoise() {
-    const octaves = [];
-    for (let i = 0; i < noise_param.n_octaves; i++) {
-        octaves.push(createNoise3D(new Mash(i)));
+    const { n_octaves, frequency, persistence, lacunarity } = noise_param;
+    const octaves = new Array(n_octaves);
+
+    for (let i = 0; i < n_octaves; i++) {
+        const noise = createNoise3D(new Mash(i));
+        const noise_frequency = frequency * Math.pow(lacunarity, i);
+        const amplitude = Math.pow(persistence, i);
+        octaves[i] = (x, y, z) => amplitude * noise(x * noise_frequency, y * noise_frequency, z * noise_frequency);
     }
 
     return (x, y, z) => {
         let value = 0;
-        let octave_amplitude = 1;
-        let octave_frequency = noise_param.frequency;
 
-        for (let i = 0; i < noise_param.n_octaves; i++) {
-            if (i >= octaves.length) {
-                octaves.push(createNoise3D());
-            }
-
-            value += octave_amplitude * octaves[i](octave_frequency*x, octave_frequency*y, octave_frequency*z);
-            octave_amplitude *= noise_param.persistence;
-            octave_frequency *= noise_param.lacunarity;
+        for (let i = 0; i < n_octaves; i++) {
+            value += octaves[i](x, y, z);
         }
 
-        value = clamp(value, -1, 1)
-        value = (value + 1)*surfaceMask(x, y, z) - 1;
-        value = (value - 1)*floorMask(x, y, z) + 1;
+        value = clamp(value, -1, 1);
+        value = (value + 1) * surfaceMask(x, y, z) - 1;
+        value = (value - 1) * floorMask(x, y, z) + 1;
 
         return value;
     }

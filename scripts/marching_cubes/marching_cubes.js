@@ -19,85 +19,85 @@ export function getNormalChunkCoords(x, y, z) {
 }
 
 
-function getCubeIndex(noise_values, x, y, z, threshold) {
+function getCubeIndex(threshold, noise_x_y_z, noise_x1_y_z, noise_x_y1_z, noise_x1_y1_z, noise_x_y_z1, noise_x1_y_z1, noise_x_y1_z1, noise_x1_y1_z1) {
     let cube_index = 0;
 
-    if (noise_values[x][y][z] < threshold) cube_index |= 1;
-    if (noise_values[x + 1][y][z] < threshold) cube_index |= 2;
-    if (noise_values[x + 1][y + 1][z] < threshold) cube_index |= 4;
-    if (noise_values[x][y + 1][z] < threshold) cube_index |= 8;
-    if (noise_values[x][y][z + 1] < threshold) cube_index |= 16;
-    if (noise_values[x + 1][y][z + 1] < threshold) cube_index |= 32;
-    if (noise_values[x + 1][y + 1][z + 1] < threshold) cube_index |= 64;
-    if (noise_values[x][y + 1][z + 1] < threshold) cube_index |= 128;
+    if (noise_x_y_z < threshold) cube_index |= 1;
+    if (noise_x1_y_z < threshold) cube_index |= 2;
+    if (noise_x1_y1_z < threshold) cube_index |= 4;
+    if (noise_x_y1_z < threshold) cube_index |= 8;
+    if (noise_x_y_z1 < threshold) cube_index |= 16;
+    if (noise_x1_y_z1 < threshold) cube_index |= 32;
+    if (noise_x1_y1_z1 < threshold) cube_index |= 64;
+    if (noise_x_y1_z1 < threshold) cube_index |= 128;
 
     return cube_index;
 }
 
 
-function getVertices(noise_values, x, y, z, offset, edges, ratio, threshold) {
+function getVertices(edges, threshold, xRatio, x1Ratio, ratioX, yRatio, y1Ratio, ratioY, zRatio, z1Ratio, ratioZ, noise_x_y_z, noise_x1_y_z, noise_x_y1_z, noise_x1_y1_z, noise_x_y_z1, noise_x1_y_z1, noise_x_y1_z1, noise_x1_y1_z1) {
     const vertices = [];
     const indices = new Array(12).fill(-1);
 
     if (edges & 1) {
         indices[0] = vertices.length / 3;
-        const mu = (threshold - noise_values[x][y][z]) / (noise_values[x + 1][y][z] - noise_values[x][y][z]);
-        vertices.push((x + mu)*ratio.x + offset.x, y*ratio.y + offset.y, z*ratio.z + offset.z);
+        const mu = (threshold - noise_x_y_z) / (noise_x1_y_z - noise_x_y_z);
+        vertices.push(xRatio + mu*ratioX, yRatio, zRatio);
     }
     if (edges & 2) {
         indices[1] = vertices.length / 3;
-        const mu = (threshold - noise_values[x + 1][y][z]) / (noise_values[x + 1][y + 1][z] - noise_values[x + 1][y][z]);
-        vertices.push((x + 1)*ratio.x + offset.x, (y + mu)*ratio.y + offset.y, z*ratio.z + offset.z);
+        const mu = (threshold - noise_x1_y_z) / (noise_x1_y1_z - noise_x1_y_z);
+        vertices.push(x1Ratio, yRatio + mu*ratioY, zRatio);
     }
     if (edges & 4) {
         indices[2] = vertices.length / 3;
-        const mu = (threshold - noise_values[x][y + 1][z]) / (noise_values[x + 1][y + 1][z] - noise_values[x][y + 1][z]);
-        vertices.push((x + mu)*ratio.x + offset.x, (y + 1)*ratio.y + offset.y, z*ratio.z + offset.z);
+        const mu = (threshold - noise_x_y1_z) / (noise_x1_y1_z - noise_x_y1_z);
+        vertices.push(xRatio + mu*ratioX, y1Ratio, zRatio);
     }
     if (edges & 8) {
         indices[3] = vertices.length / 3;
-        const mu = (threshold - noise_values[x][y][z]) / (noise_values[x][y + 1][z] - noise_values[x][y][z]);
-        vertices.push(x*ratio.x + offset.x, (y + mu)*ratio.y + offset.y, z*ratio.z + offset.z);
+        const mu = (threshold - noise_x_y_z) / (noise_x_y1_z - noise_x_y_z);
+        vertices.push(xRatio, yRatio + mu*ratioY, zRatio);
     }
     if (edges & 16) {
         indices[4] = vertices.length / 3;
-        const mu = (threshold - noise_values[x][y][z + 1]) / (noise_values[x + 1][y][z + 1] - noise_values[x][y][z + 1]);
-        vertices.push((x + mu)*ratio.x + offset.x, y*ratio.y + offset.y, (z + 1)*ratio.z + offset.z);
+        const mu = (threshold - noise_x_y_z1) / (noise_x1_y_z1 - noise_x_y_z1);
+        vertices.push(xRatio + mu*ratioX, yRatio, z1Ratio);
     }
     if (edges & 32) {
         indices[5] = vertices.length / 3;
-        const mu = (threshold - noise_values[x + 1][y][z + 1]) / (noise_values[x + 1][y + 1][z + 1] - noise_values[x + 1][y][z + 1]);
-        vertices.push((x + 1)*ratio.x + offset.x, (y + mu)*ratio.y + offset.y, (z + 1)*ratio.z + offset.z);
+        const mu = (threshold - noise_x1_y_z1) / (noise_x1_y1_z1 - noise_x1_y_z1);
+        vertices.push(x1Ratio, yRatio + mu*ratioY, z1Ratio);
     }
     if (edges & 64) {
         indices[6] = vertices.length / 3;
-        const mu = (threshold - noise_values[x][y + 1][z + 1]) / (noise_values[x + 1][y + 1][z + 1] - noise_values[x][y + 1][z + 1]);
-        vertices.push((x + mu)*ratio.x + offset.x, (y + 1)*ratio.y + offset.y, (z + 1)*ratio.z + offset.z);
+        const mu = (threshold - noise_x_y1_z1) / (noise_x1_y1_z1 - noise_x_y1_z1);
+        vertices.push(xRatio + mu*ratioX, y1Ratio, z1Ratio);
     }
     if (edges & 128) {
         indices[7] = vertices.length / 3;
-        const mu = (threshold - noise_values[x][y][z + 1]) / (noise_values[x][y + 1][z + 1] - noise_values[x][y][z + 1]);
-        vertices.push(x*ratio.x + offset.x, (y + mu)*ratio.y + offset.y, (z + 1)*ratio.z + offset.z);
+        const mu = (threshold - noise_x_y_z1) / (noise_x_y1_z1 - noise_x_y_z1);
+        vertices.push(xRatio, yRatio + mu*ratioY, z1Ratio);
     }
     if (edges & 256) {
         indices[8] = vertices.length / 3;
-        const mu = (threshold - noise_values[x][y][z]) / (noise_values[x][y][z + 1] - noise_values[x][y][z]);
-        vertices.push(x*ratio.x + offset.x, y*ratio.y + offset.y, (z + mu)*ratio.z + offset.z);
+        const mu = (threshold - noise_x_y_z) / (noise_x_y_z1 - noise_x_y_z);
+        vertices.push(xRatio, yRatio, zRatio + mu*ratioZ);
     }
     if (edges & 512) {
         indices[9] = vertices.length / 3;
-        const mu = (threshold - noise_values[x + 1][y][z]) / (noise_values[x + 1][y][z + 1] - noise_values[x + 1][y][z]);
-        vertices.push((x + 1)*ratio.x + offset.x, y*ratio.y + offset.y, (z + mu)*ratio.z + offset.z);
+        const mu = (threshold - noise_x1_y_z) / (noise_x1_y_z1 - noise_x1_y_z);
+        vertices.push(x1Ratio, yRatio, zRatio + mu*ratioZ);
     }
     if (edges & 1024) {
         indices[10] = vertices.length / 3;
-        const mu = (threshold - noise_values[x + 1][y + 1][z]) / (noise_values[x + 1][y + 1][z + 1] - noise_values[x + 1][y + 1][z]);
-        vertices.push((x + 1)*ratio.x + offset.x, (y + 1)*ratio.y + offset.y, (z + mu)*ratio.z + offset.z);
+        const mu = (threshold - noise_x1_y1_z) / (noise_x1_y1_z1 - noise_x1_y1_z);
+        vertices.push(x1Ratio, y1Ratio, zRatio + mu*ratioZ);
     }
     if (edges & 2048) {
         indices[11] = vertices.length / 3;
-        const mu = (threshold - noise_values[x][y + 1][z]) / (noise_values[x][y + 1][z + 1] - noise_values[x][y + 1][z]);
-        vertices.push(x*ratio.x + offset.x, (y + 1)*ratio.y + offset.y, (z + mu)*ratio.z + offset.z);
+        const mu = (threshold - noise_x_y1_z) / (noise_x_y1_z1 - noise_x_y1_z);
+        vertices.push(xRatio, y1Ratio, zRatio + mu*ratioZ);
     }
 
     return {_vertices: vertices, _vertex_indices: indices};
@@ -105,46 +105,102 @@ function getVertices(noise_values, x, y, z, offset, edges, ratio, threshold) {
 
 
 function createGeometry(chunk_idx, n_vertices, chunk_size, threshold) {
-    const local_noise = (x, y, z) => noise(chunk_idx.x + x/n_vertices.x, chunk_idx.y + y/n_vertices.y, chunk_idx.z + z/n_vertices.z);
+    const invNVerticesX = 1 / n_vertices.x;
+    const invNVerticesY = 1 / n_vertices.y;
+    const invNVerticesZ = 1 / n_vertices.z;
 
-    const offset = new THREE.Vector3(chunk_idx.x * chunk_size.x, chunk_idx.y * chunk_size.y, chunk_idx.z * chunk_size.z);
-    const ratio = new THREE.Vector3(chunk_size.x / n_vertices.x, chunk_size.y / n_vertices.y, chunk_size.z / n_vertices.z);
+    const noise_values = new Float32Array((n_vertices.x + 1) * (n_vertices.y + 1) * (n_vertices.z + 1));
+    let noiseIndex = 0;
+    for (let x = 0; x <= n_vertices.x; x++) {
+        const xValue = chunk_idx.x + x*invNVerticesX;
+        for (let y = 0; y <= n_vertices.y; y++) {
+            const yValue = chunk_idx.y + y*invNVerticesY;
+            for (let z = 0; z <= n_vertices.z; z++) {
+                const zValue = chunk_idx.z + z*invNVerticesZ;
+                noise_values[noiseIndex++] = noise(xValue, yValue, zValue);
+            }
+        }
+    }
 
-    const noise_values = Array.from({length: n_vertices.x + 1}, (_, x) =>
-        Array.from({length: n_vertices.y + 1}, (_, y) =>
-            Array.from({length: n_vertices.z + 1}, (_, z) => 
-                local_noise(x, y, z)
-            )
-        )
-    );
+    const ratioX = chunk_size.x / n_vertices.x;
+    const ratioY = chunk_size.y / n_vertices.y;
+    const ratioZ = chunk_size.z / n_vertices.z;
+    const offsetX = chunk_idx.x * chunk_size.x;
+    const offsetY = chunk_idx.y * chunk_size.y;
+    const offsetZ = chunk_idx.z * chunk_size.z;
 
     const vertices = [];
     const indices = [];
     const normals = [];
 
-    for (let x = 0; x < n_vertices.x; x++) {
-        for (let y = 0; y < n_vertices.y; y++) {
-            for (let z = 0; z < n_vertices.z; z++) {
-                const cube_index = getCubeIndex(noise_values, x, y, z, threshold);
+    const numVerticesX = n_vertices.x;
+    const numVerticesY = n_vertices.y;
+    const numVerticesZ = n_vertices.z;
+    const numVerticesZ1 = (numVerticesZ + 1);
+    const numVerticesY1Z1 = (numVerticesY + 1) * numVerticesZ1;
 
-                const edges = edgeTable[cube_index];
-                const triangles = triTable.slice(cube_index * 16, cube_index * 16 + 16).filter((val) => val != -1);
+    let verticesIndex = 0;
+    let indicesIndex = 0;
 
-                const {_vertices, _vertex_indices} = getVertices(noise_values, x, y, z, offset, edges, ratio, threshold);
-                const _indices = triangles.map((val) => _vertex_indices[val] + vertices.length / 3);
+    for (let x = 0; x < numVerticesX; x++) {
+        const xRatio = x * ratioX + offsetX;
+        const x1Ratio = (x + 1) * ratioX + offsetX;
 
-                vertices.push(..._vertices);
-                indices.push(..._indices);
+        for (let y = 0; y < numVerticesY; y++) {
+            const yRatio = y * ratioY + offsetY;
+            const y1Ratio = (y + 1) * ratioY + offsetY;
+
+            for (let z = 0; z < numVerticesZ; z++) {
+                const zRatio = z * ratioZ + offsetZ;
+                const z1Ratio = (z + 1) * ratioZ + offsetZ;
+
+                const noise_x_y_z = noise_values[x * numVerticesY1Z1 + y * numVerticesZ1 + z];
+                const noise_x1_y_z = noise_values[(x + 1) * numVerticesY1Z1 + y * numVerticesZ1 + z];
+                const noise_x_y1_z = noise_values[x * numVerticesY1Z1 + (y + 1) * numVerticesZ1 + z];
+                const noise_x1_y1_z = noise_values[(x + 1) * numVerticesY1Z1 + (y + 1) * numVerticesZ1 + z];
+                const noise_x_y_z1 = noise_values[x * numVerticesY1Z1 + y * numVerticesZ1 + (z + 1)];
+                const noise_x1_y_z1 = noise_values[(x + 1) * numVerticesY1Z1 + y * numVerticesZ1 + (z + 1)];
+                const noise_x_y1_z1 = noise_values[x * numVerticesY1Z1 + (y + 1) * numVerticesZ1 + (z + 1)];
+                const noise_x1_y1_z1 = noise_values[(x + 1) * numVerticesY1Z1 + (y + 1) * numVerticesZ1 + (z + 1)];
+
+                const cubeIndex = getCubeIndex(threshold, noise_x_y_z, noise_x1_y_z, noise_x_y1_z, noise_x1_y1_z, noise_x_y_z1, noise_x1_y_z1, noise_x_y1_z1, noise_x1_y1_z1);
+
+                const edges = edgeTable[cubeIndex];
+                
+                const tempIndices = [];
+                let numTriangles = 0;
+
+                for (let i = cubeIndex * 16; i < (cubeIndex + 1) * 16; i++) {
+                    if (triTable[i] == -1) break;
+                    tempIndices[numTriangles++] = triTable[i];
+                }
+
+                const { _vertices, _vertex_indices } = getVertices(edges, threshold, xRatio, x1Ratio, ratioX, yRatio, y1Ratio, ratioY, zRatio, z1Ratio, ratioZ, noise_x_y_z, noise_x1_y_z, noise_x_y1_z, noise_x1_y1_z, noise_x_y_z1, noise_x1_y_z1, noise_x_y1_z1, noise_x1_y1_z1);
+
+                const baseIndex = verticesIndex / 3;
+                for (let i = 0; i < _vertices.length; i++) {
+                    vertices[verticesIndex++] = _vertices[i];
+                }
+
+                for (let i = 0; i < numTriangles; i++) {
+                    indices[indicesIndex++] = _vertex_indices[tempIndices[i]] + baseIndex;
+                }
             }
         }
     }
+
+    let numNormals = 0;
 
     for (let i = 0; i < vertices.length; i += 3) {
         const vx = vertices[i] / chunk_size.x;
         const vy = vertices[i + 1] / chunk_size.y;
         const vz = vertices[i + 2] / chunk_size.z;
 
-        normals.push(...getNormalChunkCoords(vx, vy, vz));
+        const normal = getNormalChunkCoords(vx, vy, vz);
+
+        normals[numNormals++] = normal[0];
+        normals[numNormals++] = normal[1];
+        normals[numNormals++] = normal[2];
     }
 
     return {
