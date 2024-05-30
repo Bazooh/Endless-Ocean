@@ -115,7 +115,7 @@ bool isAtmoshepere(float depth) {
 
 
 float cloudDensity(vec3 point) {
-    return texture(cloudTexture, fract(point / 2.0)).r * 2.0;
+    return texture(cloudTexture, fract(point / 2.0)).r * 20.0;
 }
 
 
@@ -137,7 +137,7 @@ vec3 lightSample(float sampleOpticalDepth, vec3 startPoint, vec3 endPoint, bool 
 
     float sum = 0.0;
     for (int i = 0; i < uRayNumberOfPoints; i++) {
-        // sum += clouds ? cloudDensity(samplePoint) : density(samplePoint);
+        sum += clouds ? cloudDensity(samplePoint) : density(samplePoint);
         sum += density(samplePoint);
         samplePoint += offset;
     }
@@ -220,7 +220,7 @@ vec3 intensity(vec3 pos, vec3 dir, vec3 sunPosition) {
         // else
         //     intersectionRaySphere(samplePoint, sampleDirection, vec3(0.0), uEarthRadius + uCloudsHeight, atomsphereEntryPoint, cloudsEntryPoint, behind);
         
-        // sum += lightSample(sampleOpticalDepth, cloudsEntryPoint, atomsphereEndPoint, true) * cloudDensity(cloudsEntryPoint);
+        // sum += lightSample(sampleOpticalDepth, cloudsEntryPoint, atomsphereEndPoint, true) * cloudDensity(0.5*(cloudsEntryPoint + atomsphereEndPoint));
 
         samplePoint += offset;
         sampleOpticalDepth += density(samplePoint) * sampleLength;
