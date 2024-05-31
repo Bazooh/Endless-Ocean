@@ -38,7 +38,7 @@ export function updateTimeGUI(gui, time, shader) {
 }
 
 
-export function updateAtmoshpereGUI(gui, atmosphere_param, shader) {
+export function updateAtmosphereGUI(gui, atmosphere_param, shader) {
     const folder = gui.addFolder('Atmosphere');
     folder.add(atmosphere_param, 'uSunIntensity', 0, 2, 0.01).onChange((value) => shader.uniforms.uSunIntensity.value = value);
     

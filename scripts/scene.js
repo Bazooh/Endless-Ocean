@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'control';
 import { updateChunksShaderTime } from './chunk.js';
-import { updateNoiseGUI, updateAtmoshpereGUI, updateViewGUI, updateTimeGUI, updatePresetGUI, updateCloudsGUI, updateFishGUI } from './gui.js';
+import { updateNoiseGUI, updateAtmosphereGUI, updateViewGUI, updateTimeGUI, updatePresetGUI, updateCloudsGUI, updateFishGUI } from './gui.js';
 import { GUI } from 'dat.gui';
 import { Player, updatePlayerGUI } from './entities/player.js';
 import { updateCameraGUI } from './entities/followCamera.js';
@@ -14,7 +14,6 @@ import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three/examples/jsm/post
 import { ShaderPass } from 'https://cdn.jsdelivr.net/npm/three/examples/jsm/postprocessing/ShaderPass.js';
 import { getCloudsTexture, clouds_param } from './clouds.js';
 import { fishes_param } from './fish/fish.js';
-
 
 const playerSpawn = {
     position: {
@@ -67,7 +66,15 @@ export const player = new Player(
     view.generation_distance
 );
 
-const composer = new EffectComposer(renderer);
+// Create a render target with a depth texture
+const depthTexture = new THREE.DepthTexture();
+depthTexture.type = THREE.UnsignedShortType;
+const renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
+    depthTexture: depthTexture,
+    depthBuffer: true,
+});
+
+const composer = new EffectComposer(renderer, renderTarget);
 composer.addPass(new RenderPass(scene, camera));
 
 addShader(
@@ -75,7 +82,6 @@ addShader(
     {},
     {
         tDiffuse: null,
-
         tDepth: null,
         uTime: performance.now(),
         uCameraPosition: camera.position,
@@ -101,7 +107,7 @@ addShader(
     updatePlayerGUI(gui, player);
     updateCameraGUI(gui, controls, player);
     updateLightGUI(gui, player);
-    updateAtmoshpereGUI(gui, atmosphere_param, composer.passes[1]);
+    updateAtmosphereGUI(gui, atmosphere_param, composer.passes[1]);
     updateViewGUI(gui, view, player);
     updateTimeGUI(gui, time, composer.passes[1]);
     updatePresetGUI(gui, { time, atmosphere_param });
@@ -124,11 +130,11 @@ function animate() {
     prev_time = performance.now();
 
     if (!time.timeStatic)
-        time.uTimeOfDay = (time.uTimeOfDay + 24*delta_time / (1000*time.dayLength)) % 24;
-    
+        time.uTimeOfDay = (time.uTimeOfDay + 24 * delta_time / (1000 * time.dayLength)) % 24;
+
     // update post-processing shader
     if (composer.passes[1] !== undefined) {
-        composer.passes[1].uniforms.tDepth.value = composer.renderTarget2.texture;
+        composer.passes[1].uniforms.tDepth.value = renderTarget.depthTexture;
         composer.passes[1].uniforms.uTime.value += delta_time;
         composer.passes[1].uniforms.uTimeOfDay.value = time.uTimeOfDay;
         composer.passes[1].uniforms.uCameraPosition.value = camera.position;
@@ -144,15 +150,14 @@ function animate() {
 
 animate();
 
-//Resize Screen
+// Resize Screen
 function ResizeWindow() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     composer.render();
-};
+}
 
-
-window.addEventListener( 'resize', ResizeWindow);
+window.addEventListener('resize', ResizeWindow);
 
 Run();

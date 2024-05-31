@@ -110,7 +110,7 @@ vec2 distort(vec2 uv, vec2 amplitude, vec2 frequency, vec2 phase) {
 
 
 bool isAtmoshepere(float depth) {
-    return depth == 0.0;
+    return depth <= 0.0;
 }
 
 
@@ -256,10 +256,7 @@ vec3 starsColor(vec3 color, vec3 lookingDirection) {
 vec3 atmosphereColor(vec3 sunPosition, vec3 horizonColor) {
     vec3 lookingDirection = getLookingDirection();
 
-    if ((uCameraPosition.y > 0.0 && lookingDirection.y < 0.0) || (uCameraPosition.y < 0.0 && lookingDirection.y > 0.0)) {
-        return horizonColor;
-    } else if (uCameraPosition.y < 0.0) {
-        const vec3 spaceColor = vec3(0.0);
+    if ((uCameraPosition.y >= 0.0 && lookingDirection.y < 0.0) || uCameraPosition.y < 0.0) {
         return horizonColor;
     }
 
@@ -277,7 +274,16 @@ vec3 atmosphereColor(vec3 sunPosition, vec3 horizonColor) {
 }
 
 
+float linearizeDepth(float depth) {
+    float z = depth * 2.0 - 1.0; // Back to NDC
+    const float cameraNear = 0.001;
+    const float cameraFar = 10.0;
+    return 1.0 - (2.0 * cameraNear * cameraFar) / (cameraFar + cameraNear - z * (cameraFar - cameraNear));
+}
+
+
 void main() {
+
     const vec3 oceanColor = vec3(0.0, 0.0, 0.3);
     const vec2 amplitude = vec2(0.001, 0.001);
     const vec2 frequency = vec2(20.0, 20.0);
@@ -287,10 +293,9 @@ void main() {
 
     vec2 uv = distort(vUv, amplitude, frequency, time_scale * vec2(uTime, uTime));
     vec4 diffuse = texture2D(tDiffuse, uv);
+    float depth = linearizeDepth(texture2D(tDepth, vUv).r);
 
     vec3 color = mix(oceanColor, diffuse.rgb, 0.5);
-
-    float depth = texture2D(tDepth, uv).r;
 
     float dt = fract(uTimeOfDay / 24.0);
     float sunDistance = 149e3;
@@ -305,12 +310,12 @@ void main() {
     vec3 horizonColor = mix(vec3(0.0), farOceanColor, sunIntensity);
 
     if (isAtmoshepere(depth)) {
-        vec3 color = atmosphereColor(sunPosition, horizonColor);
+        color = atmosphereColor(sunPosition, horizonColor);
         gl_FragColor = vec4(color, 1.0);
         return;
     }
     
-    float blur = (1.0 - depth) * (1.0 - sunIntensity);
+    float blur = (1.0 - 0.5*depth) * (1.0 - sunIntensity);
 
     color = mix(color, horizonColor, blur);
 
