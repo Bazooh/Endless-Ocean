@@ -12,20 +12,22 @@ uniform float uLightIntensity;
 
 vec3 normal;
 
+const vec3 black = vec3(0.001);
+
 
 vec3 get_lighting() {
     vec3 pos = worldPosition - uLightPos;
     float angle = acos(dot(normalize(pos), uLightDir));
 
     if (angle > uLightAngle) {
-        return vec3(0.001);
+        return black;
     }
 
     vec3 lightDir = normalize(uLightPos - worldPosition);
-    float diff = max(dot(normal, lightDir), 0.0);
+    float diff = max(dot(normal, lightDir), 0.001);
     vec3 diffuse = diff * uLightColor * uLightIntensity / length(pos);
 
-    return mix(diffuse, vec3(0.0), smoothstep(0.4, 1.0, angle / uLightAngle));
+    return mix(diffuse, black, smoothstep(0.4, 1.0, angle / uLightAngle));
 }
 
 
